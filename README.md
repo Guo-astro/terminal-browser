@@ -16,9 +16,17 @@ curl -fsSL https://terminal-browser.sh/install | bash
 ```
 > Note: Run `terminal-browser upgrade` to upgrade versions
 
-### Homebrew
+### Homebrew (macOS & Linux):
 ```
 brew install terminal-browser
+```
+
+### Windows
+To install on Windows you must be using WSL. Terminals with kitty graphics support are also very limited on Windows, the following are terminals I have tested that terminal-browser will work on inside Windows:
+- https://noctty.com/
+ 
+```bash
+curl -fsSL https://terminal-browser.sh/install | bash
 ```
 
 ### Claude code plugin
