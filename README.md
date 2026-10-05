@@ -38,6 +38,7 @@ terminal-browser # launches the browser
 terminal-browser open <url> # opens the browser at a url
 terminal-browser --split right # opens the browser in a split pane to the right
 terminal-browser open --ssh <user@host> <url> # performs all network requests through a remote server
+terminal-browser open --transparent <url> # the terminal background will show through pages without a background color
 terminal-browser ls # lists open browsers
 terminal-browser action # an agent-browser compatible cli for interacting with open terminal-browsers
 terminal-browser upgrade # upgrade to the latest version
