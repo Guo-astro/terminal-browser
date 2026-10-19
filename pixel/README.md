@@ -1,24 +1,63 @@
-# Pixel
-A library for building graphical applications that can run in the terminal
+<p align="center">
+  <img src="website/app/icon.svg" width="96" alt="Pixel">
+</p>
 
+# Pixel
+
+A library for building graphical applications that can run in the terminal
 
 ```
 npm create @zenbu-labs/pixel@latest
 ```
 
 ## Notable features:
+
 - A react API to use a rust based graphics engine that runs in the terminal
 - WebView component that lets you render web content (based on top of a fork of electron)
 - Support for proxying network requests made by the webview over an SSH connection
 - Can be embedded inside other terminal applications
 - Built in devtools (element inspector, profiler, log viewer)
+- Cross platform
 
 ## Projects using pixel
+
 - [terminal-browser](https://github.com/zenbu-labs/terminal-browser) - a browser inside the terminal
 - [terminal-code](https://github.com/zenbu-labs/terminal-code) - vscode inside the terminal
+# Docs
+
+The documentation below is meant for humans that want to get a better conceptual understanding of the library. For detailed api documentation for your agents please reference [AGENT-DOCS](./AGENT-DOCS.md). 
+
+## How does it work
+
+Pixel allows for GUIs in the terminal by using a terminal feature to display raw pixels. You can use this feature through a standard known as the [kitty graphics protocol]. This standard allows terminal programs to write instructions to stdout that tell the terminal:
+- what pixels to display
+- what region to display the pixels
+
+Under the hood, the Pixel library is converting your UI definitions into these graphics instructions.
+
+## Rendering types
+Pixel has 2 ways to render UI:
+1. the native react API
+2. the webview component
+
+These 2 options will give you significantly different results. The webview component lets you render full fidelity webapps, using the chromium browser engine under the hood. This means chromium speed and styling capabilities. 
+
+The native react api lets you define your UI in react, but this gets interpreted by the pixel engine under the hood, which has less styling capabilities than css, and for heavy UI would be less efficient.
+
+One downside to using the webview component is that it requires your app to spawn a new ["renderer" process](https://www.chromium.org/developers/design-documents/multi-process-architecture/#architectural-overview), which can easily consume hundreds of mb if you're not careful. While the pixel engine can use <1mb for simple apps. 
+
+The native UI and webview component can be useful if paired together since it allows you to embed webview components relative to the native UI elements. This allows you to implement a tabbed browser like [terminal-browser](https://github.com/zenbu-labs/terminal-browser)
 
 
-## Documentation
-Documentation is WIP. You can find examples of many usage patterns inside [`examples`](examples). For advanced usage you can reference the above projects that use pixel in production. 
 
+
+## Multiplexers
+Pixel apps will work in multiplexers, but it will have worse performance, and may loose capabilities, like receiving lower precision mouse position values.
+
+
+This is because multiplexers rewrite the output of terminal programs in a way that forces pixel to send graphics commands in a de-optimized format, which can result in increased cpu usage. 
+
+
+## Questions
+If you are curious how something works or behaves, I highly recommend asking your coding agent to clone this github repo and explore this package, then ask whatever questions you want!
 
