@@ -167,10 +167,24 @@ jobs:
           ' "$VERSION"
       - name: Publish
         run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          # Wait until a just-published version resolves, so nothing that depends on it ships first.
+          wait_for() {
+            for _ in $(seq 1 60); do
+              npm view "$1@$VERSION" version --prefer-online >/dev/null 2>&1 && { echo "$1@$VERSION is visible"; return 0; }
+              sleep 5
+            done
+            echo "timed out waiting for $1@$VERSION" >&2
+            exit 1
+          }
           for pkg in pixel/packages/native/*; do
             (cd "$pkg" && npm publish --access public --provenance)
           done
+          for pkg in pixel/packages/native/*; do
+            wait_for "$(node -p "require('./$pkg/package.json').name")"
+          done
           (cd pixel/packages/pixel && npm publish --access public --provenance)
+          wait_for @zenbu-labs/pixel
           (cd pixel/packages/create-pixel && npm publish --access public --provenance)
       - name: GitHub release
         env:

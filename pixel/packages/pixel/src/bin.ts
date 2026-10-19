@@ -127,7 +127,8 @@ async function main(): Promise<number> {
   else delete env[UNSUPPORTED_ENV];
   if (announced) env.PIXEL_PANE = announced.pane;
   else delete env.PIXEL_PANE;
-  const stderr = fs.openSync(logFile(appDir(entry)), "a");
+  const log = logFile(appDir(entry));
+  const stderr = fs.openSync(log, "a");
   const child = spawn(electron, [bootstrap, entry, ...chromiumArgs, ...appArgs], {
     stdio: ["inherit", "inherit", stderr],
     env,
@@ -148,7 +149,12 @@ async function main(): Promise<number> {
       process.stderr.write(`pixel: could not start electron: ${error.message}\n`);
       resolve(1);
     });
-    child.on("exit", (code, signal) => resolve(code ?? (signal ? 128 : 0)));
+    child.on("exit", (code, signal) => {
+      if (code && !unsupported) {
+        process.stderr.write(`pixel crashed (exit code ${code}). Full logs: ${log}\n`);
+      }
+      resolve(code ?? (signal ? 128 : 0));
+    });
   });
   await waitForOwners(tty);
   return exited;

@@ -155,7 +155,7 @@ const start = pm === "npm" ? ["run", "start"] : ["start"];
 const install = !flags["no-install"];
 if (install) {
   prompts.log.step(`Installing dependencies with ${pm}...`);
-  run(pm, ["install"], root);
+  run(pm, pm === "npm" ? ["install", "--prefer-online"] : ["install"], root);
 }
 
 if (gitInit(root)) prompts.log.step("Initialized a git repository.");
