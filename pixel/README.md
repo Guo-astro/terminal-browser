@@ -84,6 +84,28 @@ This is extremely useful if you expect you would want an agent to open the pixel
 
 In this scenario, `--split right` is powered by pixels terminal scripting API, which under the hood implements scripting commands for many terminals and multiplexers.
 
+
+## Devtools
+
+Pixel comes with built in devtools, available by right clicking an app in dev mode. The most useful tool is the profiler, which can be used to optimize performance w/ agents by doing the following:
+1. start a profile
+2. interact with the app to cause slowdown
+3. stop and export the profile
+
+Agents can read the exported profile, and optimize based on the data.
+
+The profiler devtool also gives you an option to see what pixel data is being sent to the terminal
+
+https://github.com/user-attachments/assets/681a1578-2c32-4dde-a4e8-2470c4dea7dc
+
+
+## UI Transparency
+Pixel native UI and webviews support transparency. By default native UI has transparency on, so it will automatically show your terminal background color, and if your terminal background is transparent, that will also apply to the pixel UI. Webviews by default are opaque, but can be flipped on through the webview options.
+
+Because of internal implementation details, rendering opaque UI is slightly more performant compared to transparent UI. So if you are trying to minimize CPU usage, you can try making all content opaque.
+
+
+
 ## Questions
 If you are curious how something works or behaves, I highly recommend asking your coding agent to clone this github repo and explore this package, then ask whatever questions you want!
 
