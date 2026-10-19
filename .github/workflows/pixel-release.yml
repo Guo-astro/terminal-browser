@@ -176,20 +176,8 @@ jobs:
             if [ "$(status "$1")" = 200 ]; then echo "$1 $VERSION is already published"; return 0; fi
             (cd "$1" && npm publish --access public --provenance)
           }
-          # Wait until a just-published version resolves, so nothing that depends on it ships first.
-          wait_for() {
-            for _ in $(seq 1 60); do
-              code="$(status "$1")"
-              [ "$code" = 200 ] && { echo "$1 $VERSION is visible"; return 0; }
-              sleep 5
-            done
-            echo "timed out waiting for $1 $VERSION (last status $code)" >&2
-            exit 1
-          }
           for pkg in pixel/packages/native/*; do publish "$pkg"; done
-          for pkg in pixel/packages/native/*; do wait_for "$pkg"; done
           publish pixel/packages/pixel
-          wait_for pixel/packages/pixel
           publish pixel/packages/create-pixel
       - name: GitHub release
         env:
