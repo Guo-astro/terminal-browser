@@ -29,7 +29,7 @@ The documentation below is meant for humans that want to get a better conceptual
 
 ## How does it work
 
-Pixel allows for GUIs in the terminal by using a terminal feature to display raw pixels. You can use this feature through a standard known as the [kitty graphics protocol]. This standard allows terminal programs to write instructions to stdout that tell the terminal:
+Pixel allows for GUIs in the terminal by using a terminal feature to display raw pixels. You can use this feature through a standard known as the [kitty graphics protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/). This standard allows terminal programs to write instructions to stdout that tell the terminal:
 - what pixels to display
 - what region to display the pixels
 
