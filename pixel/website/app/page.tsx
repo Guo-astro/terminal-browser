@@ -36,7 +36,7 @@ const DEMOS: Demo[] = [
     // fixme: placeholder copy
     caption: (
       <>
-        <a href={REPO}>terminal-browser</a> · a real browser inside your terminal
+        <a href="https://terminal-browser.com">terminal-browser</a> · a real browser inside your terminal
       </>
     ),
   },
@@ -46,7 +46,7 @@ const DEMOS: Demo[] = [
     // fixme: placeholder copy
     caption: (
       <>
-        <a href="https://tode.sh">terminal-code</a> · vscode inside your terminal
+        <a href="https://terminal-code.com">terminal-code</a> · vscode inside your terminal
       </>
     ),
   },
