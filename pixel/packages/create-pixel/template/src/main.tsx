@@ -37,7 +37,7 @@ const root = createRoot({
 const PIXEL = "https://github.com/zenbu-labs/terminal-browser/tree/main/pixel";
 
 const LINKS = [
-  { title: "Docs", url: `${PIXEL}#documentation` },
+  { title: "Docs", url: `${PIXEL}#docs` },
   { title: "Examples", url: `${PIXEL}/examples` },
 ];
 

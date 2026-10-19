@@ -131,25 +131,12 @@ if (fs.existsSync(root) && !isEmpty(root)) {
   if (action === "yes") emptyDir(root);
 }
 
-let packageName = path.basename(root);
-if (!isValidPackageName(packageName)) {
-  if (interactive) {
-    const answer = await prompts.text({
-      message: "Package name:",
-      defaultValue: toValidPackageName(packageName),
-      placeholder: toValidPackageName(packageName),
-      validate: (value) => (!value || isValidPackageName(value) ? undefined : "Invalid package.json name"),
-    });
-    if (prompts.isCancel(answer)) cancel();
-    packageName = answer || toValidPackageName(packageName);
-  } else {
-    packageName = toValidPackageName(packageName);
-  }
-}
+const folderName = path.basename(root);
+const packageName = isValidPackageName(folderName) ? folderName : toValidPackageName(folderName);
 
 const pm = packageManager();
 
-prompts.log.step(`Scaffolding project in ${root}...`);
+prompts.log.step(`Scaffolding project in ${root}${packageName === folderName ? "" : ` (package name "${packageName}")`}...`);
 
 const SKIP = new Set(["node_modules", "dist"]);
 fs.mkdirSync(root, { recursive: true });
