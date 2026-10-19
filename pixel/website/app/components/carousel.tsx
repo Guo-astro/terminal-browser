@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type Demo = {
@@ -48,7 +49,10 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
           <button
             key={demo.label}
             className={i === current ? "on" : undefined}
-            onClick={() => show(i)}
+            onClick={() => {
+              show(i);
+              track("demo_selected", { demo: demo.label });
+            }}
           >
             {demo.label}
           </button>
@@ -66,7 +70,10 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
                   src={demo.media.src}
                   muted
                   onEnded={() => i === current && show(current + 1)}
-                  onClick={() => setPaused((p) => !p)}
+                  onClick={() => {
+                    track(paused ? "demo_resumed" : "demo_paused", { demo: demo.label });
+                    setPaused(!paused);
+                  }}
                   playsInline
                   preload="metadata"
                 />

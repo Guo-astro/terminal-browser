@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useState } from "react";
 import { CopyIcon } from "./icons";
 
@@ -16,6 +17,7 @@ export default function Install() {
 
   function copy() {
     navigator.clipboard.writeText(command);
+    track("install_copied", { manager: MANAGERS[manager].name });
     setCopied(true);
     setTimeout(() => setCopied(false), 1600);
   }
@@ -24,7 +26,10 @@ export default function Install() {
     <div className="install">
       <div className="managers">
         {MANAGERS.map((m, i) => (
-          <button key={m.name} className={i === manager ? "on" : undefined} onClick={() => setManager(i)}>
+          <button key={m.name} className={i === manager ? "on" : undefined} onClick={() => {
+              setManager(i);
+              track("package_manager_selected", { manager: m.name });
+            }}>
             {m.name}
           </button>
         ))}

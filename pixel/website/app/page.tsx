@@ -1,9 +1,11 @@
 import Carousel, { type Demo } from "./components/carousel";
 import { GithubMark, StarIcon } from "./components/icons";
 import Install from "./components/install";
+import LinkTracker from "./components/link-tracker";
 import PixelBackground from "./components/pixel-background";
 import { starCount } from "./components/stars";
 import Wordmark from "./components/wordmark";
+import WipTag from "./components/wip-tag";
 
 export const revalidate = 3600;
 
@@ -91,8 +93,9 @@ export default async function Home() {
   return (
     <>
       <PixelBackground />
+      <LinkTracker />
       <div className="col">
-        <header className="site">
+        <header className="site" data-area="header">
           <span />
           <span className="right">
             <a href={DOCS}>docs</a>
@@ -114,13 +117,13 @@ export default async function Home() {
           <Install />
         </div>
 
-        <section>
+        <section data-area="demos">
           {/* fixme: placeholder copy */}
           <h2>Demos</h2>
           <Carousel demos={DEMOS} />
         </section>
 
-        <section>
+        <section data-area="features">
           {/* fixme: placeholder copy */}
           <h2>Features</h2>
           <ul className="facts">
@@ -130,7 +133,7 @@ export default async function Home() {
           </ul>
         </section>
 
-        <section>
+        <section data-area="platforms">
           {/* fixme: placeholder copy */}
           <h2>Supported platforms</h2>
           <ul className="facts platforms">
@@ -144,18 +147,17 @@ export default async function Home() {
             </li>
             <li>
               <span>Windows</span>
-              <span className="wip" tabIndex={0}>
+              <WipTag
+                // fixme: placeholder copy
+                tooltip="You can use pixel on Windows today through WSL. Native Windows support is a work in progress."
+              >
                 WIP
-                {/* fixme: placeholder copy */}
-                <span className="tooltip" role="tooltip">
-                  You can use pixel on Windows today through WSL. Native Windows support is a work in progress.
-                </span>
-              </span>
+              </WipTag>
             </li>
           </ul>
         </section>
 
-        <section>
+        <section data-area="used_by">
           {/* fixme: placeholder copy */}
           <h2>Used by</h2>
           <div className="rows">
@@ -172,7 +174,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section>
+        <section data-area="terminals">
           {/* fixme: placeholder copy */}
           <h2>Supported terminals</h2>
           <ul className="terminals">
@@ -182,7 +184,7 @@ export default async function Home() {
           </ul>
         </section>
 
-        <footer>
+        <footer data-area="footer">
           <span>MIT · zenbu labs</span>
           <span className="links">
             <a href={DOCS}>docs</a>
