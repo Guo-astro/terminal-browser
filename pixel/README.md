@@ -8,6 +8,9 @@ A library for building graphical applications that can run in the terminal
 npm create @zenbu-labs/pixel@latest
 ```
 
+<!-- fixme: placeholder copy -->
+<img alt="pixel demos: terminal-browser, terminal-code and Zed running in a terminal" src="website/public/media/demos.gif" />
+
 ## Notable features:
 
 - A react API to use a rust based graphics engine that runs in the terminal
@@ -53,8 +56,17 @@ The native UI and webview component can be useful if paired together since it al
 Pixel apps will work in multiplexers, but it will have worse performance, and may loose capabilities, like receiving lower precision mouse position values.
 
 
-This is because multiplexers rewrite the output of terminal programs in a way that forces pixel to send graphics commands in a de-optimized format, which can result in increased cpu usage. 
+This is because multiplexers rewrite the output of terminal programs in a way that:
+- forces pixel to send graphics commands in a de-optimized format
+- (might) drop requests for terminal features like precise mouse position reporting
 
+Herdr and tmux are examples of multiplexers that have been tested to work with pixel.
+
+
+## SSH
+Pixel will work out of the box over SSH. In supported terminals, pixel will only send changed pixels over the SSH connection to minimmize bandwidth usage and improve performance. The reason this works is that pixel sends the pixel data directly through stdout, which is then sent over the SSH connection, and then interpreted by the terminal.
+
+Pixel also comes with support for proxyiing webview network requests over an SSH connection. In this mode the UI would be running locally on your device. This is useful if you want to run a backend on a remote server for an application, but still want the UI to be very snappy and responsive. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
 
 ## Questions
 If you are curious how something works or behaves, I highly recommend asking your coding agent to clone this github repo and explore this package, then ask whatever questions you want!
