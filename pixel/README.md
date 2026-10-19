@@ -44,7 +44,7 @@ These 2 options will give you significantly different results. The webview compo
 
 The native react api lets you define your UI in react, but this gets interpreted by the pixel engine under the hood, which has less styling capabilities than css, and for heavy UI would be less efficient than chromium.
 
-One downside to using the webview component is that it requires your app to spawn a new ["renderer" process](https://www.chromium.org/developers/design-documents/multi-process-architecture/#architectural-overview), which can easily consume hundreds of mb if you're not careful. While the pixel engine can use <10mb for a simple app.
+One downside to using the webview component is that it requires your app to spawn a new [renderer process](https://www.chromium.org/developers/design-documents/multi-process-architecture/#architectural-overview), which can easily consume hundreds of mb if you're not careful. While the pixel engine can use <10mb for a simple app.
 
 The native UI and webview component can be useful if paired together since it allows you to embed webview components relative to the native UI elements. This allows you to implement a tabbed browser like [terminal-browser](https://github.com/zenbu-labs/terminal-browser)
 
