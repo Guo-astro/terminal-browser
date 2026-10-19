@@ -49,10 +49,13 @@ const DEMOS: Demo[] = [
   },
   {
     label: "Zed",
+    media: { kind: "video", src: "/media/zed.mp4" },
     // fixme: placeholder copy
-    media: { kind: "image", src: "/media/zed.jpg", alt: "Zed running in a terminal pane" },
-    // fixme: placeholder copy
-    caption: "zed · the zed editor inside your terminal",
+    caption: (
+      <>
+        <a href={`${EXAMPLES}/zed`}>zed</a> · the zed editor inside your terminal
+      </>
+    ),
   },
 ];
 

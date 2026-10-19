@@ -49,11 +49,7 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
   }, [current, cycle, paused]);
 
   return (
-    <div
-      ref={root}
-      className={paused ? "carousel paused" : "carousel"}
-      style={{ "--slide-ms": `${SLIDE_MS}ms` } as React.CSSProperties}
-    >
+    <div ref={root} className="carousel">
       <div className="tabs">
         {demos.map((demo, i) => (
           <button
@@ -90,9 +86,6 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
               )}
             </div>
           ))}
-        </div>
-        <div className="progress">
-          <i key={cycle} />
         </div>
       </div>
       <div className="captions">

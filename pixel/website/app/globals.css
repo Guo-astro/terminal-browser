@@ -94,7 +94,7 @@ header.site .right a:hover { color: var(--text); }
 .copy:hover { border-color: var(--border-soft); color: var(--text2); }
 .copy.done { color: var(--g); }
 
-.carousel { --slide-ms: 9000ms; display: grid; grid-template-columns: 150px 1fr; column-gap: 22px; }
+.carousel { display: grid; grid-template-columns: 150px 1fr; column-gap: 22px; }
 .carousel [data-slide="0"] { --slide-color: var(--r); }
 .carousel [data-slide="1"] { --slide-color: var(--g); }
 .carousel [data-slide="2"] { --slide-color: var(--b); }
@@ -111,16 +111,12 @@ header.site .right a:hover { color: var(--text); }
 .slide.on { opacity: 1; pointer-events: auto; }
 .slide video, .slide img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
 
-.progress { position: relative; height: 2px; overflow: hidden; background: var(--border); }
-.progress i { position: absolute; inset: 0; background: var(--muted); transform-origin: left; transform: scaleX(0); animation: fill var(--slide-ms) linear forwards; }
-.carousel.paused .progress i { animation: none; transform: none; }
-@keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-
+.carousel.paused 
 .captions { grid-column: 2; margin-top: 10px; font-size: 12px; color: var(--faint); min-height: 23px; }
 .captions p { display: none; margin: 0; }
 .captions p.on { display: block; }
-.captions a { color: var(--muted); }
-.captions a:hover { color: var(--text); }
+.captions a { color: var(--text2); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 3px; }
+.captions a:hover { color: var(--text); text-decoration-color: var(--text); }
 
 @media (max-width: 640px) {
   .carousel { grid-template-columns: 1fr; }
