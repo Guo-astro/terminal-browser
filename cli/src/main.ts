@@ -22,7 +22,6 @@ import {
   cannotOpenPanes,
   checkTerminal,
   detect,
-  unsupportedGraphicsMessage,
 } from "@zenbu-labs/pixel/terminal";
 import { findOwner } from "@zenbu-labs/pixel/terminal";
 import type { Direction, Terminal, TerminalCheck } from "@zenbu-labs/pixel/terminal";
@@ -471,6 +470,20 @@ async function newTabCommand(url: string | undefined, key: string | undefined): 
   if (tty) split.push(`--parent-tty=${tty}`);
   reportOpened(recordKey(await launchInSplit(check.terminal!, "right", split, null)));
   return 0;
+}
+
+function unsupportedGraphicsMessage(color: boolean): string {
+  const sgr = (code: string, text: string) => (color ? `\x1b[${code}m${text}\x1b[0m` : text);
+  return [
+    "",
+    `  ${sgr("1", "Unsupported terminal: this terminal cannot display graphics")}`,
+    "",
+    `  ${sgr("2", "We recommend Ghostty:")}`,
+    `  ${sgr("4", "https://ghostty.org/download")}`,
+    "",
+    `  ${sgr("2", "Note: any terminal that supports the kitty graphics protocol is supported")}`,
+    "",
+  ].join("\n");
 }
 
 async function requireGraphics(check: TerminalCheck) {
