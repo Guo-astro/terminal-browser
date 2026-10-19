@@ -96,6 +96,7 @@ function createRoot(options?: RootOptions): Root
 | `onKey?(event: EngineKeyEvent): boolean \| void` | called for every key; return `true` to stop it reaching the focused WebView or Input |
 | `onQuit?(view: WebViewHandle \| null)` | called when a page navigates to `pixel://quit` or calls `pixel.quit()`; default stops the root |
 | `onExit?(code: number)` | called after the root stops; default `app.exit(code)` |
+| `onUnsupportedTerminal?(terminal: Terminal \| null): string` | text written to the terminal when `pixel` found no graphics support; the process then exits 1 |
 | `onRightClick?({ x, y })` | right click outside a WebView |
 | `onPaste?(text)` | text paste |
 | `onPasteImage?(image: PastedImage)` | image paste |
@@ -334,7 +335,6 @@ Usage: `<WebView src={session.url} {...session.view} />`. Example: `examples/ssh
 | `probeGraphics(terminal)` | kitty graphics query with a 500ms timeout |
 | `canSplit(terminal)` | whether the terminal implements `split` |
 | `cannotOpenPanes(terminal)` | user facing message when it cannot |
-| `unsupportedGraphicsMessage(color?)` | user facing message for missing graphics support |
 | `GRAPHICS_SKIP_ENV` | `"PIXEL_SKIP_GRAPHICS_CHECK"` |
 | `shellIn(env): Run` | runs a command in a login shell |
 | `bracketedPaste(text)`, `shellLiteral(text)`, `PASTE_KEY` | text helpers for `sendText` |

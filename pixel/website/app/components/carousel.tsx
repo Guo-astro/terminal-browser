@@ -2,18 +2,16 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-const SLIDE_MS = 9000;
-
 export type Demo = {
   label: string;
-  media: { kind: "video"; src: string; poster?: string } | { kind: "image"; src: string; alt: string };
+  media: { kind: "video"; src: string; size: [number, number] } | { kind: "image"; src: string; alt: string; size: [number, number] };
   caption: ReactNode;
 };
 
 export default function Carousel({ demos }: { demos: Demo[] }) {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [cycle, setCycle] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const videos = useRef<(HTMLVideoElement | null)[]>([]);
@@ -21,6 +19,7 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
   function show(index: number) {
     setCurrent((index + demos.length) % demos.length);
     setCycle((n) => n + 1);
+    setPaused(false);
   }
 
   useEffect(() => {
@@ -37,16 +36,10 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
   useEffect(() => {
     videos.current.forEach((video, i) => {
       if (!video) return;
-      if (visible && i === current) video.play().catch(() => {});
+      if (visible && i === current && !paused) video.play().catch(() => {});
       else video.pause();
     });
-  }, [current, cycle, visible]);
-
-  useEffect(() => {
-    if (paused) return;
-    const timer = setTimeout(() => show(current + 1), SLIDE_MS);
-    return () => clearTimeout(timer);
-  }, [current, cycle, paused]);
+  }, [current, cycle, visible, paused]);
 
   return (
     <div ref={root} className="carousel">
@@ -55,17 +48,14 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
           <button
             key={demo.label}
             className={i === current ? "on" : undefined}
-            onClick={() => {
-              setPaused(true);
-              show(i);
-            }}
+            onClick={() => show(i)}
           >
             {demo.label}
           </button>
         ))}
       </div>
       <div className="stage">
-        <div className="slides">
+        <div className="slides" style={{ aspectRatio: `${demos[current].media.size[0]} / ${demos[current].media.size[1]}` }}>
           {demos.map((demo, i) => (
             <div key={demo.label} className={i === current ? "slide on" : "slide"}>
               {demo.media.kind === "video" ? (
@@ -74,9 +64,9 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
                     videos.current[i] = el;
                   }}
                   src={demo.media.src}
-                  poster={demo.media.poster}
                   muted
-                  loop
+                  onEnded={() => i === current && show(current + 1)}
+                  onClick={() => setPaused((p) => !p)}
                   playsInline
                   preload="metadata"
                 />

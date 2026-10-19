@@ -98,10 +98,11 @@ header.site .right a:hover { color: var(--text); }
 .carousel .tabs button:hover { color: var(--muted); }
 .carousel .tabs button.on { color: var(--text); }
 
-.slides { position: relative; aspect-ratio: 16 / 10; border: 1px solid var(--border); background: #000; overflow: hidden; }
-.slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.35s; pointer-events: none; }
+.slides { position: relative; overflow: hidden; container-type: inline-size; }
+.slide { position: absolute; inset: 0; opacity: 0; pointer-events: none; overflow: hidden; border-radius: 1.45cqw; border: 1px solid var(--border); }
 .slide.on { opacity: 1; pointer-events: auto; }
-.slide video, .slide img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.slide video { cursor: pointer; }
+.slide video, .slide img { position: absolute; inset: -0.12cqw; display: block; width: calc(100% + 0.24cqw); height: calc(100% + 0.24cqw); object-fit: cover; }
 
 .carousel.paused 
 .captions { grid-column: 2; margin-top: 10px; font-size: 12px; color: var(--faint); min-height: 23px; }
@@ -188,3 +189,5 @@ body { position: relative; }
 .star-icon { width: 14px; height: 14px; margin-right: 5px; vertical-align: -2px; color: var(--faint); }
 .gh-stars b,
 .rows .m { display: inline-flex; align-items: center; }
+.terminals { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 23px; color: var(--text2); border-top: 1px solid var(--border-soft); }
+.terminals li { padding: 8px 0; border-bottom: 1px solid var(--border-soft); }

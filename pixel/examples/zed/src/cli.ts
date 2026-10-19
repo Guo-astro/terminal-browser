@@ -4,7 +4,7 @@ import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 
-import { checkTerminal, detect, unsupportedGraphicsMessage } from "@zenbu-labs/pixel/terminal";
+import { checkTerminal, detect } from "@zenbu-labs/pixel/terminal";
 
 import { SOCKET, STATE_DIR, isSetUp } from "./paths";
 import { lines } from "./protocol";
@@ -85,7 +85,7 @@ async function main(): Promise<number> {
   const tty = process.env.PIXEL_TTY ?? ownTty();
   const check = await checkTerminal(detect());
   if (check.graphics === "unsupported") {
-    process.stderr.write(unsupportedGraphicsMessage(true));
+    process.stderr.write("this terminal doesn't support graphics\n");
     return 1;
   }
 

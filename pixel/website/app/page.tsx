@@ -30,7 +30,7 @@ const FEATURES = [
 const DEMOS: Demo[] = [
   {
     label: "Browser",
-    media: { kind: "video", src: "https://terminal-browser.com/demo.mp4", poster: "https://terminal-browser.com/demo-poster.png" },
+    media: { kind: "video", src: "/media/browser.mp4", size: [1954, 1214] },
     // fixme: placeholder copy
     caption: (
       <>
@@ -40,7 +40,7 @@ const DEMOS: Demo[] = [
   },
   {
     label: "Vscode",
-    media: { kind: "video", src: "https://tode.sh/demo-dark.mp4" },
+    media: { kind: "video", src: "/media/vscode.mp4", size: [1972, 1240] },
     // fixme: placeholder copy
     caption: (
       <>
@@ -50,7 +50,7 @@ const DEMOS: Demo[] = [
   },
   {
     label: "Zed",
-    media: { kind: "video", src: "/media/zed.mp4" },
+    media: { kind: "video", src: "/media/zed.mp4", size: [1954, 1214] },
     // fixme: placeholder copy
     caption: (
       <>
@@ -58,6 +58,24 @@ const DEMOS: Demo[] = [
       </>
     ),
   },
+];
+
+const TERMINALS = [
+  "Ghostty",
+  "iTerm2",
+  "xterm.js",
+  "Konsole",
+  "WezTerm",
+  "Warp",
+  "noctty (Ghostty for Windows)",
+  "Mobile SSH",
+  "st (with a patch)",
+  "wayst",
+  "AbsoluteTelnet/SSH",
+  "cmux",
+  "tty7",
+  "VS Code",
+  "Cursor",
 ];
 
 const USED_BY = [
@@ -98,18 +116,18 @@ export default async function Home() {
 
         <section>
           {/* fixme: placeholder copy */}
+          <h2>Demos</h2>
+          <Carousel demos={DEMOS} />
+        </section>
+
+        <section>
+          {/* fixme: placeholder copy */}
           <h2>Features</h2>
           <ul className="facts">
             {FEATURES.map((feature) => (
               <li key={feature}>{feature}</li>
             ))}
           </ul>
-        </section>
-
-        <section>
-          {/* fixme: placeholder copy */}
-          <h2>Demos</h2>
-          <Carousel demos={DEMOS} />
         </section>
 
         <section>
@@ -152,6 +170,16 @@ export default async function Home() {
               </a>
             ))}
           </div>
+        </section>
+
+        <section>
+          {/* fixme: placeholder copy */}
+          <h2>Supported terminals</h2>
+          <ul className="terminals">
+            {TERMINALS.map((terminal) => (
+              <li key={terminal}>{terminal}</li>
+            ))}
+          </ul>
         </section>
 
         <footer>
