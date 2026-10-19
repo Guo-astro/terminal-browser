@@ -79,7 +79,9 @@ Pixel provides a standardized way to script the host terminal the pixel app is r
 This is extremely useful if you expect you would want an agent to open the pixel app for you next to itself. For example, imagine the following scenario for the pixel app [terminal-browser](https://github.com/zenbu-labs/terminal-browser):
 
 > [user] Can you open my website inside terminal-browser?
+> 
 > [agent] Sure!
+> 
 > [agent] Bash(terminal-browser open localhost:3000 --split right)
 
 In this scenario, `--split right` is powered by pixels terminal scripting API, which under the hood implements scripting commands for many terminals and multiplexers.
