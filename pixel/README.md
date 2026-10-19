@@ -59,7 +59,7 @@ This is because multiplexers rewrite the output of terminal programs in a way th
 - forces pixel to send graphics commands in a de-optimized format
 - (might) drop requests for terminal features like precise mouse position reporting
 
-Herdr and tmux are examples of multiplexers that have been tested to work with pixel.
+[Herdr](https://herdr.dev/) and [tmux](https://github.com/tmux/tmux) are examples of multiplexers that have been tested to work with pixel.
 
 
 ## SSH
