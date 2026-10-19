@@ -63,7 +63,7 @@ This is because multiplexers rewrite the output of terminal programs in a way th
 
 
 ## SSH
-Pixel will work out of the box over SSH. In supported terminals, pixel will only send changed pixels over the SSH connection to minimmize bandwidth usage and improve performance. The reason this works is that pixel sends the pixel data directly through stdout, which is then sent over the SSH connection, and then interpreted by the terminal.
+Pixel will work out of the box over SSH. In supported terminals, pixel will only send changed pixels over the SSH connection to minimmize bandwidth usage and improve performance. The reason this works is that pixel sends the image data through stdout, just like any other terminal program output. The image data is then sent over the SSH connection, and then interpreted by the terminal.
 
 Pixel also comes with support for proxyiing webview network requests over an SSH connection. In this mode the UI would be running locally on your device. This is useful if you want to run a backend on a remote server for an application, but still want the UI to be very snappy and responsive. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
 
