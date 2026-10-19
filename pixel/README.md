@@ -40,7 +40,9 @@ Pixel has 2 ways to render UI:
 1. the native react API
 2. the webview component
 
-These 2 options will give you significantly different results. The webview component lets you render full fidelity webapps, using the chromium browser engine under the hood. This means chromium speed and styling capabilities. 
+These 2 options will give you significantly different results. 
+
+The webview component lets you render full fidelity webapps, using the chromium browser engine under the hood. This means chromium speed and styling capabilities. 
 
 The native react api lets you define your UI in react, but this gets interpreted by the pixel engine under the hood, which has less styling capabilities than css, and for heavy UI would be less efficient than chromium.
 
