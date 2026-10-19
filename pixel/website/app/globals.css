@@ -89,8 +89,8 @@ header.site .right a:hover { color: var(--text); }
 .captions { grid-column: 2; margin-top: 10px; font-size: 12px; color: var(--faint); min-height: 23px; }
 .captions p { display: none; margin: 0; }
 .captions p.on { display: block; }
-.captions a { color: var(--text2); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 3px; }
-.captions a:hover { color: var(--text); text-decoration-color: var(--text); }
+.captions a { color: var(--muted); transition: color 0.15s; }
+.captions a:hover { color: var(--text); }
 
 @media (max-width: 640px) {
   .carousel { grid-template-columns: 1fr; }

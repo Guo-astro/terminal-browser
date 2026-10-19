@@ -168,24 +168,29 @@ jobs:
       - name: Publish
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
+          status() {
+            curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/$(node -p "require('./$1/package.json').name.replace('/', '%2f')")/$VERSION"
+          }
+          # Skip versions that are already on npm, so a partly finished release can be re-run.
+          publish() {
+            if [ "$(status "$1")" = 200 ]; then echo "$1 $VERSION is already published"; return 0; fi
+            (cd "$1" && npm publish --access public --provenance)
+          }
           # Wait until a just-published version resolves, so nothing that depends on it ships first.
           wait_for() {
             for _ in $(seq 1 60); do
-              npm view "$1@$VERSION" version --prefer-online >/dev/null 2>&1 && { echo "$1@$VERSION is visible"; return 0; }
+              code="$(status "$1")"
+              [ "$code" = 200 ] && { echo "$1 $VERSION is visible"; return 0; }
               sleep 5
             done
-            echo "timed out waiting for $1@$VERSION" >&2
+            echo "timed out waiting for $1 $VERSION (last status $code)" >&2
             exit 1
           }
-          for pkg in pixel/packages/native/*; do
-            (cd "$pkg" && npm publish --access public --provenance)
-          done
-          for pkg in pixel/packages/native/*; do
-            wait_for "$(node -p "require('./$pkg/package.json').name")"
-          done
-          (cd pixel/packages/pixel && npm publish --access public --provenance)
-          wait_for @zenbu-labs/pixel
-          (cd pixel/packages/create-pixel && npm publish --access public --provenance)
+          for pkg in pixel/packages/native/*; do publish "$pkg"; done
+          for pkg in pixel/packages/native/*; do wait_for "$pkg"; done
+          publish pixel/packages/pixel
+          wait_for pixel/packages/pixel
+          publish pixel/packages/create-pixel
       - name: GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

@@ -34,31 +34,19 @@ const DEMOS: Demo[] = [
     label: "Browser",
     media: { kind: "video", src: "/media/browser.mp4", poster: "/media/browser-poster.jpg", size: [1954, 1214] },
     // fixme: placeholder copy
-    caption: (
-      <>
-        <a href="https://terminal-browser.com">terminal-browser</a> · a real browser inside your terminal
-      </>
-    ),
+    caption: <a href="https://terminal-browser.com">terminal-browser.com →</a>,
   },
   {
     label: "Vscode",
     media: { kind: "video", src: "/media/vscode.mp4", poster: "/media/vscode-poster.jpg", size: [1972, 1240] },
     // fixme: placeholder copy
-    caption: (
-      <>
-        <a href="https://terminal-code.com">terminal-code</a> · vscode inside your terminal
-      </>
-    ),
+    caption: <a href="https://terminal-code.com">terminal-code.com →</a>,
   },
   {
     label: "Zed",
     media: { kind: "video", src: "/media/zed.mp4", poster: "/media/zed-poster.jpg", size: [1954, 1214] },
     // fixme: placeholder copy
-    caption: (
-      <>
-        <a href={`${EXAMPLES}/zed`}>zed</a> · the zed editor inside your terminal
-      </>
-    ),
+    caption: <a href={`${EXAMPLES}/zed`}>examples/zed →</a>,
   },
 ];
 
