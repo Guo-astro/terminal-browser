@@ -24,7 +24,7 @@ const FEATURES = [
   // fixme: placeholder copy
   "Cross platform",
   // fixme: placeholder copy
-  "Built on top of Rust with a TypeScript React API",
+  "TypeScript React API",
   // fixme: placeholder copy
   "Agent-friendly dev tools",
 ];

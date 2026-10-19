@@ -16,5 +16,5 @@ zed-pixel shutdown
 
 This example is based on a [fork of zed](https://github.com/purduehackers/zed), built by
 [Ray Arayilakath](https://github.com/rayhanadev), that compiles zed's ui to web assembly so that
-zed can be rendered using GPUI as a backend. This example pairs the (forked) zed with pixel's
+zed can be rendered using webgpu as a backend. This example pairs the (forked) zed with pixel's
 webview component to run zed in the terminal.
