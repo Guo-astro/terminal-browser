@@ -106,19 +106,6 @@ function App() {
     >
       <Wordmark cell={Math.round(rem * 0.7)} color={theme.fg} />
 
-      <Box style={{ alignItems: "center", gap: rem * 0.5 }}>
-        <Text style={{ fontSize: rem * 0.9, color: theme.muted, selectable: false }}>Get started by editing</Text>
-        <Box
-          style={{
-            padding: { left: rem * 0.5, right: rem * 0.5, top: rem * 0.2, bottom: rem * 0.2 },
-            background: theme.field,
-            border: { width: 1, color: theme.hairline },
-          }}
-        >
-          <Text style={{ fontSize: rem * 0.85, color: theme.fg }}>src/main.tsx</Text>
-        </Box>
-      </Box>
-
       <Box style={{ gap: rem * 2 }}>
         {LINKS.map((link) => (
           <Link key={link.title} href={link.url} style={{ fontSize: rem * 0.9, color: theme.muted, hoverColor: theme.fg }}>
