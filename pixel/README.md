@@ -54,7 +54,7 @@ The native UI and webview component can be useful if paired together since it al
 
 
 ## Multiplexers
-Pixel apps will work in multiplexers, but it will have worse performance, and may loose capabilities, like receiving lower precision mouse position values.
+Pixel apps will work in multiplexers, but will have worse performance, and may loose capabilities, like receiving lower precision mouse position values.
 
 
 This is because multiplexers rewrite the output of terminal programs in a way that:
