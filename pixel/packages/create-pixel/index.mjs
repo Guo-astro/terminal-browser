@@ -18,7 +18,7 @@ const USAGE = `usage: npm create @zenbu-labs/pixel@latest [dir] [-- options]
   the current directory.
 
   --overwrite        remove existing files in [dir] (keeps .git)
-  --immediate        install dependencies and start the app
+  --no-install       only write the files
   --no-interactive   never prompt, use defaults
 `;
 
@@ -27,7 +27,7 @@ const { values: flags, positionals } = parseArgs({
   options: {
     help: { type: "boolean", short: "h" },
     overwrite: { type: "boolean" },
-    immediate: { type: "boolean" },
+    "no-install": { type: "boolean" },
     interactive: { type: "boolean" },
     "no-interactive": { type: "boolean" },
   },
@@ -77,6 +77,16 @@ function toValidPackageName(name) {
 function packageManager() {
   const agent = process.env.npm_config_user_agent;
   return agent ? agent.split(" ")[0].split("/")[0] : "npm";
+}
+
+function gitInit(root) {
+  const git = (...args) => spawnSync("git", args, { cwd: root, stdio: "ignore" }).status === 0;
+  if (!git("--version") || git("rev-parse", "--is-inside-work-tree")) return false;
+  if (!git("init")) return false;
+  const committed =
+    git("checkout", "-b", "main") && git("add", "-A") && git("commit", "-m", "Initial commit from create-pixel");
+  if (!committed) fs.rmSync(path.join(root, ".git"), { recursive: true, force: true });
+  return committed;
 }
 
 function run(command, args, cwd) {
@@ -139,17 +149,6 @@ if (!isValidPackageName(packageName)) {
 
 const pm = packageManager();
 
-let immediate = flags.immediate;
-if (immediate === undefined) {
-  if (interactive) {
-    const answer = await prompts.confirm({ message: `Install with ${pm} and start now?` });
-    if (prompts.isCancel(answer)) cancel();
-    immediate = answer;
-  } else {
-    immediate = false;
-  }
-}
-
 prompts.log.step(`Scaffolding project in ${root}...`);
 
 const SKIP = new Set(["node_modules", "dist"]);
@@ -166,16 +165,17 @@ fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
 const start = pm === "npm" ? ["run", "start"] : ["start"];
 
-if (immediate) {
+const install = !flags["no-install"];
+if (install) {
   prompts.log.step(`Installing dependencies with ${pm}...`);
   run(pm, ["install"], root);
-  prompts.log.step("Starting the app...");
-  run(pm, start, root);
-  process.exit(0);
 }
+
+if (gitInit(root)) prompts.log.step("Initialized a git repository.");
 
 const relative = path.relative(process.cwd(), root);
 const steps = [];
 if (root !== process.cwd()) steps.push(`cd ${relative.includes(" ") ? `"${relative}"` : relative}`);
-steps.push(`${pm} install`, `${pm} ${start.join(" ")}`);
+if (!install) steps.push(`${pm} install`);
+steps.push(`${pm} ${start.join(" ")}`);
 prompts.outro(`Done. Now run:\n\n${steps.map((step) => `  ${step}`).join("\n")}`);
