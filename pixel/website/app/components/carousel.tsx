@@ -54,7 +54,6 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
         {demos.map((demo, i) => (
           <button
             key={demo.label}
-            data-slide={i}
             className={i === current ? "on" : undefined}
             onClick={() => {
               setPaused(true);
