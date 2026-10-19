@@ -127,8 +127,8 @@ footer::before {
   left: 0;
   right: 0;
   top: -40px;
-  height: 3px;
-  background: repeating-linear-gradient(90deg, var(--border) 0 3px, transparent 3px 7px);
+  height: 1px;
+  background: var(--border);
 }
 @media (max-width: 640px) {
   section { margin-top: 80px; }
