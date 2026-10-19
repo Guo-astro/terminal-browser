@@ -14,7 +14,8 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
   const [cycle, setCycle] = useState(0);
   const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const frame = useRef<HTMLDivElement>(null);
   const videos = useRef<(HTMLVideoElement | null)[]>([]);
 
   function show(index: number) {
@@ -24,10 +25,17 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
   }
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
-    if (root.current) observer.observe(root.current);
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.intersectionRatio >= 0.99), { threshold: 1 });
+    if (frame.current) observer.observe(frame.current);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (scrolled) return;
+    const onScroll = () => setScrolled(true);
+    window.addEventListener("scroll", onScroll, { once: true, passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [scrolled]);
 
   useEffect(() => {
     const video = videos.current[current];
@@ -37,13 +45,13 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
   useEffect(() => {
     videos.current.forEach((video, i) => {
       if (!video) return;
-      if (visible && i === current && !paused) video.play().catch(() => {});
+      if (scrolled && visible && i === current && !paused) video.play().catch(() => {});
       else video.pause();
     });
-  }, [current, cycle, visible, paused]);
+  }, [current, cycle, visible, scrolled, paused]);
 
   return (
-    <div ref={root} className="carousel">
+    <div className="carousel">
       <div className="tabs">
         {demos.map((demo, i) => (
           <button
@@ -59,7 +67,7 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
         ))}
       </div>
       <div className="stage">
-        <div className="slides" style={{ aspectRatio: `${demos[current].media.size[0]} / ${demos[current].media.size[1]}` }}>
+        <div ref={frame} className="slides" style={{ aspectRatio: `${demos[current].media.size[0]} / ${demos[current].media.size[1]}` }}>
           {demos.map((demo, i) => (
             <div key={demo.label} className={i === current ? "slide on" : "slide"}>
               {demo.media.kind === "video" ? (
