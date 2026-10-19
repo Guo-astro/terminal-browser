@@ -9,8 +9,7 @@ const PER_CLUSTER = 14;
 const CLUSTERS = 7;
 const STRAYS = 45;
 const FALLOFF_FRACTION = 0.5;
-const TEXT_PAD_CSS_PX = 8;
-const KEEP_ON_TEXT = 0.08;
+const CONTENT_PAD_CSS_PX = 20;
 const STRAY_TRIES = 6;
 const FPS = 12;
 const TRAIL_STEP_CSS_PX = 24;
@@ -20,7 +19,9 @@ const TRAIL_MIN_MS = 150;
 const TRAIL_MAX_MS = 400;
 const TRAIL_ALPHA = 0.14;
 const TRAIL_MAX = 10;
-const TRAIL_AVOID = "[data-component], header, #wordmark, .lede, a, button";
+const COLUMN = ".col";
+const HERO = ".hero";
+const HERO_CONTENT = "header .right, #wordmark, .lede, .install";
 const CHANNEL_SETS = [[0], [1], [2], [0, 1], [1, 2], [0, 2], [0, 1, 2]];
 
 type Rect = { x0: number; y0: number; x1: number; y1: number };
@@ -37,7 +38,6 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
   let tints: string[] = [];
   let pixels: Pixel[] = [];
   let keepOut: Rect[] = [];
-  let components: Rect[] = [];
 
   let seed = 7;
   const random = () => {
@@ -51,43 +51,42 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
     tints = ["--r", "--g", "--b"].map((name) => css.getPropertyValue(name).trim());
   }
 
-  function measureText() {
-    const origin = canvas.getBoundingClientRect();
-    const toTriads = (rect: DOMRect): Rect => ({
-      x0: (rect.left - origin.left - TEXT_PAD_CSS_PX) / TRIAD_CSS_PX,
-      y0: (rect.top - origin.top - TEXT_PAD_CSS_PX) / TRIAD_CSS_PX,
-      x1: (rect.right - origin.left + TEXT_PAD_CSS_PX) / TRIAD_CSS_PX,
-      y1: (rect.bottom - origin.top + TEXT_PAD_CSS_PX) / TRIAD_CSS_PX,
-    });
-    const rects: Rect[] = [];
-    const push = (rect: DOMRect) => {
-      if (rect.width && rect.height) rects.push(toTriads(rect));
-    };
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-      acceptNode: (node) => (node.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
-    });
-    const range = document.createRange();
-    while (walker.nextNode()) {
-      range.selectNodeContents(walker.currentNode);
-      for (const rect of range.getClientRects()) push(rect);
+  function keepOutRects(): DOMRect[] {
+    const rects: DOMRect[] = [];
+    const pad = (r: DOMRect) =>
+      new DOMRect(r.left - CONTENT_PAD_CSS_PX, r.top - CONTENT_PAD_CSS_PX, r.width + CONTENT_PAD_CSS_PX * 2, r.height + CONTENT_PAD_CSS_PX * 2);
+    document.querySelectorAll(HERO_CONTENT).forEach((el) => rects.push(pad(el.getBoundingClientRect())));
+    const column = document.querySelector(COLUMN);
+    const hero = document.querySelector(HERO);
+    if (column && hero) {
+      const box = column.getBoundingClientRect();
+      const style = getComputedStyle(column);
+      const left = box.left + parseFloat(style.paddingLeft) - CONTENT_PAD_CSS_PX;
+      const right = box.right - parseFloat(style.paddingRight) + CONTENT_PAD_CSS_PX;
+      const top = hero.getBoundingClientRect().bottom;
+      rects.push(new DOMRect(left, top, right - left, box.bottom - top));
     }
-    const wordmark = document.getElementById("wordmark");
-    if (wordmark) push(wordmark.getBoundingClientRect());
-    keepOut = rects;
-    components = [...document.querySelectorAll("[data-component]")].map((el) => toTriads(el.getBoundingClientRect()));
+    return rects;
   }
 
-  const inside = (rects: Rect[], x: number, y: number) =>
-    rects.some((r) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1);
-  const onText = (x: number, y: number) => inside(keepOut, x, y);
-  const onComponent = (x: number, y: number) => inside(components, x, y);
+  function measureKeepOut() {
+    const origin = canvas.getBoundingClientRect();
+    keepOut = keepOutRects().map((r) => ({
+      x0: (r.left - origin.left) / TRIAD_CSS_PX,
+      y0: (r.top - origin.top) / TRIAD_CSS_PX,
+      x1: (r.right - origin.left) / TRIAD_CSS_PX,
+      y1: (r.bottom - origin.top) / TRIAD_CSS_PX,
+    }));
+  }
+
+  const blocked = (x: number, y: number) =>
+    keepOut.some((r) => x + 1 >= r.x0 && x <= r.x1 && y + 1 >= r.y0 && y <= r.y1);
 
   function place() {
     seed = 7;
     pixels = [];
     const add = (x: number, y: number) => {
-      if (x < 0 || y < 0 || x >= cols || y >= rows || onComponent(x, y)) return;
-      if (onText(x, y) && random() > KEEP_ON_TEXT) return;
+      if (x < 0 || y < 0 || x >= cols || y >= rows || blocked(x, y)) return;
       pixels.push({
         x: Math.round(x),
         y: Math.round(y),
@@ -108,7 +107,7 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
     for (let i = STRAYS; i > 0; i--) {
       let x = random() * cols;
       let y = sampleY();
-      for (let tries = 0; tries < STRAY_TRIES && (onText(x, y) || onComponent(x, y)); tries++) {
+      for (let tries = 0; tries < STRAY_TRIES && blocked(x, y); tries++) {
         x = random() * cols;
         y = sampleY();
       }
@@ -121,7 +120,7 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
     rows = Math.ceil(canvas.clientHeight / TRIAD_CSS_PX);
     canvas.width = cols * TRIAD;
     canvas.height = rows * TRIAD;
-    measureText();
+    measureKeepOut();
     place();
   }
 
@@ -137,8 +136,10 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
     if (Math.random() > TRAIL_CHANCE || trail.length >= TRAIL_MAX) return;
     const x = Math.floor(event.clientX / TRIAD_CSS_PX + (Math.random() * 2 - 1) * TRAIL_RADIUS);
     const y = Math.floor(event.clientY / TRIAD_CSS_PX + (Math.random() * 2 - 1) * TRAIL_RADIUS);
-    const under = document.elementFromPoint((x + 0.5) * TRIAD_CSS_PX, (y + 0.5) * TRIAD_CSS_PX);
-    if (!under || under.closest(TRAIL_AVOID)) return;
+    const px = x * TRIAD_CSS_PX;
+    const py = y * TRIAD_CSS_PX;
+    const hit = (r: DOMRect) => px + TRIAD_CSS_PX >= r.left && px <= r.right && py + TRIAD_CSS_PX >= r.top && py <= r.bottom;
+    if (keepOutRects().some(hit)) return;
     trail.push({
       x,
       y,

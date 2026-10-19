@@ -92,7 +92,7 @@ export default async function Home() {
           <Install />
         </div>
 
-        <section data-component>
+        <section>
           {/* fixme: placeholder copy */}
           <h2>Features</h2>
           <ul className="facts">
@@ -102,13 +102,13 @@ export default async function Home() {
           </ul>
         </section>
 
-        <section data-component>
+        <section>
           {/* fixme: placeholder copy */}
           <h2>Demos</h2>
           <Carousel demos={DEMOS} />
         </section>
 
-        <section data-component>
+        <section>
           {/* fixme: placeholder copy */}
           <h2>Used by</h2>
           <div className="rows">

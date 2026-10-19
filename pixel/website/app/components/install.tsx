@@ -21,7 +21,7 @@ export default function Install() {
   }
 
   return (
-    <div className="install" data-component>
+    <div className="install">
       <div className="managers">
         {MANAGERS.map((m, i) => (
           <button key={m.name} className={i === manager ? "on" : undefined} onClick={() => setManager(i)}>
