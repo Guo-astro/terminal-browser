@@ -71,7 +71,7 @@ Displaying graphics over SSH is possible because pixel sends the image data thro
 
 In supported terminals, pixel will only send changed pixels over the SSH connection to minimmize bandwidth usage and improve performance. 
 
-Pixel also comes with support for proxyiing webview network requests over an SSH connection. This is useful if you want to run a backend on a remote server for an application, but still want the UI to run locally. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
+Pixel also comes with support for proxying webview network requests over an SSH connection. This is useful if you want to run a backend on a remote server for an application, but still want the UI to run locally. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
 
 ## Questions
 If you are curious how something works or behaves, I highly recommend asking your coding agent to clone this github repo and explore this package, then ask whatever questions you want!
