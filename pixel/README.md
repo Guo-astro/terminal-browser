@@ -25,7 +25,7 @@ npm create @zenbu-labs/pixel@latest
 - [terminal-code](https://github.com/zenbu-labs/terminal-code) - vscode inside the terminal
 # Docs
 
-The documentation below is meant for humans. For detailed api documentation for your agents please reference [AGENT-DOCS.md](./AGENT-DOCS.md) and the [examples](./examples). 
+The documentation below is meant for humans. For detailed api documentation for your agents please reference [AGENT-DOCS.md](./AGENT-DOCS.md), the [examples](./examples), and the codebase itself.
 
 ## How does it work
 
