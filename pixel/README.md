@@ -2,7 +2,7 @@
 
 # Pixel
 
-A library for building graphical applications that can run in the terminal
+A library for building graphical applications in the terminal
 
 ```
 npm create @zenbu-labs/pixel@latest
