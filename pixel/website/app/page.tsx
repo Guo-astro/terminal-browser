@@ -8,8 +8,9 @@ import Wordmark from "./components/wordmark";
 export const revalidate = 3600;
 
 const REPO = "https://github.com/zenbu-labs/terminal-browser";
-const DOCS = `${REPO}/tree/main/pixel#documentation`;
-const EXAMPLES = `${REPO}/tree/main/pixel/examples`;
+const PIXEL = `${REPO}/tree/main/pixel`;
+const DOCS = `${PIXEL}#documentation`;
+const EXAMPLES = `${PIXEL}/examples`;
 
 const FEATURES = [
   // fixme: placeholder copy
@@ -78,7 +79,7 @@ export default async function Home() {
           <span className="right">
             <a href={DOCS}>docs</a>
             <a href={EXAMPLES}>examples</a>
-            <a className="gh-stars" href={REPO} title="zenbu-labs/terminal-browser">
+            <a className="gh-stars" href={PIXEL} title="zenbu-labs/terminal-browser/pixel">
               <GithubMark />
               <b>
                 <StarIcon />
@@ -135,7 +136,7 @@ export default async function Home() {
             <a href={EXAMPLES}>examples</a>
             <a href="https://www.npmjs.com/package/@zenbu-labs/pixel">npm</a>
             <a href="https://discord.gg/t3jzHHfc6z">discord</a>
-            <a href={`${REPO}/tree/main/pixel`}>github</a>
+            <a href={PIXEL}>github</a>
           </span>
         </footer>
       </div>
