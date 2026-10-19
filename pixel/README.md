@@ -3,7 +3,7 @@ A library for building graphical applications that can run in the terminal
 
 
 ```
-npm create @zenbu-labs/pixel my-app
+npm create @zenbu-labs/pixel@latest
 ```
 
 ## Notable features:

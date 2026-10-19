@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CopyIcon } from "./icons";
 
 const MANAGERS = [
-  { name: "npm", command: "npm create @zenbu-labs/pixel" },
+  { name: "npm", command: "npm create @zenbu-labs/pixel@latest" },
   { name: "pnpm", command: "pnpm create @zenbu-labs/pixel" },
   { name: "bun", command: "bun create @zenbu-labs/pixel" },
 ];

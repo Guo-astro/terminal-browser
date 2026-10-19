@@ -34,7 +34,7 @@ Paths are relative to this directory (`pixel/`). Source: `packages/pixel/src/`. 
 
 | path | shows |
 | --- | --- |
-| `packages/create-pixel/template` | the `npm create @zenbu-labs/pixel` starter; run it from the repo root with `pnpm starter` |
+| `packages/create-pixel/template` | the `npm create @zenbu-labs/pixel@latest` starter; run it from the repo root with `pnpm starter` |
 | `examples/hello` | `createRoot` + `root.loadURL`, one full screen page |
 | `examples/composed` | React layout, two `WebView`s, `DevTools`, `Input`, preload script, guest tabs |
 | `examples/transparent` | transparent root and transparent `WebView` |

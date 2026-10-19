@@ -2,70 +2,181 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { parseArgs } from "node:util";
+
+import * as prompts from "@clack/prompts";
 
 const packageDir = import.meta.dirname;
 const templateDir = path.join(packageDir, "template");
 const { version } = JSON.parse(fs.readFileSync(path.join(packageDir, "package.json"), "utf8"));
 
-const USAGE = `usage: npm create @zenbu-labs/pixel [dir] [-- --no-install]
+const DEFAULT_TARGET_DIR = "pixel-app";
 
-  Creates a pixel app in [dir] (default: pixel-app) and installs its dependencies.
+const USAGE = `usage: npm create @zenbu-labs/pixel@latest [dir] [-- options]
 
-  --no-install   only write the files
+  Creates a pixel app in [dir]. Without [dir] it asks for a project name; "." uses
+  the current directory.
+
+  --overwrite        remove existing files in [dir] (keeps .git)
+  --immediate        install dependencies and start the app
+  --no-interactive   never prompt, use defaults
 `;
 
-function fail(message) {
-  process.stderr.write(`create-pixel: ${message}\n`);
-  process.exit(1);
-}
+const { values: flags, positionals } = parseArgs({
+  allowPositionals: true,
+  options: {
+    help: { type: "boolean", short: "h" },
+    overwrite: { type: "boolean" },
+    immediate: { type: "boolean" },
+    interactive: { type: "boolean" },
+    "no-interactive": { type: "boolean" },
+  },
+});
 
-function packageManager() {
-  const agent = process.env.npm_config_user_agent ?? "";
-  if (agent.startsWith("pnpm")) return "pnpm";
-  if (agent.startsWith("bun")) return "bun";
-  if (agent.startsWith("yarn")) return "yarn";
-  return "npm";
-}
-
-const args = process.argv.slice(2);
-if (args.includes("--help") || args.includes("-h")) {
+if (flags.help) {
   process.stdout.write(USAGE);
   process.exit(0);
 }
-const install = !args.includes("--no-install");
-const target = path.resolve(args.find((arg) => !arg.startsWith("-")) ?? "pixel-app");
-const name = path.basename(target).toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^[._-]+/, "") || "pixel-app";
 
-if (fs.existsSync(target) && fs.readdirSync(target).length > 0) {
-    fail(`${target} already exists and is not empty`);
+const interactive = flags["no-interactive"] ? false : (flags.interactive ?? process.stdin.isTTY === true);
+
+function cancel() {
+  prompts.cancel("Operation cancelled");
+  process.exit(1);
 }
 
-const SKIP = new Set(["node_modules", "dist"]);
-fs.cpSync(templateDir, target, { recursive: true, filter: (source) => !SKIP.has(path.basename(source)) });
-fs.renameSync(path.join(target, "gitignore"), path.join(target, ".gitignore"));
+function formatTargetDir(dir) {
+  return dir.trim().replace(/[<>:"\\|?*]/g, "").replace(/\/+$/g, "");
+}
 
-const manifestPath = path.join(target, "package.json");
+function isEmpty(dir) {
+  const files = fs.readdirSync(dir);
+  return files.length === 0 || (files.length === 1 && files[0] === ".git");
+}
+
+function emptyDir(dir) {
+  for (const file of fs.readdirSync(dir)) {
+    if (file === ".git") continue;
+    fs.rmSync(path.join(dir, file), { recursive: true, force: true });
+  }
+}
+
+function isValidPackageName(name) {
+  return /^(?:@[a-z\d\-*~][a-z\d\-*._~]*\/)?[a-z\d\-~][a-z\d\-._~]*$/.test(name);
+}
+
+function toValidPackageName(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/^[._]/, "")
+    .replace(/[^a-z\d\-~]+/g, "-");
+}
+
+function packageManager() {
+  const agent = process.env.npm_config_user_agent;
+  return agent ? agent.split(" ")[0].split("/")[0] : "npm";
+}
+
+function run(command, args, cwd) {
+  const result = spawnSync(command, args, { cwd, stdio: "inherit" });
+  if (result.status !== 0) process.exit(result.status ?? 1);
+}
+
+prompts.intro("create-pixel");
+
+let targetDir = positionals[0] ? formatTargetDir(positionals[0]) : undefined;
+if (!targetDir) {
+  if (interactive) {
+    const answer = await prompts.text({
+      message: "Project name:",
+      defaultValue: DEFAULT_TARGET_DIR,
+      placeholder: DEFAULT_TARGET_DIR,
+    });
+    if (prompts.isCancel(answer)) cancel();
+    targetDir = formatTargetDir(answer) || DEFAULT_TARGET_DIR;
+  } else {
+    targetDir = DEFAULT_TARGET_DIR;
+  }
+}
+
+const root = path.resolve(targetDir);
+
+if (fs.existsSync(root) && !isEmpty(root)) {
+  let action = flags.overwrite ? "yes" : interactive ? undefined : "no";
+  if (!action) {
+    const answer = await prompts.select({
+      message: `${targetDir === "." ? "Current directory" : `Target directory "${targetDir}"`} is not empty. Please choose how to proceed:`,
+      options: [
+        { label: "Cancel operation", value: "no" },
+        { label: "Remove existing files and continue", value: "yes" },
+        { label: "Ignore files and continue", value: "ignore" },
+      ],
+    });
+    if (prompts.isCancel(answer)) cancel();
+    action = answer;
+  }
+  if (action === "no") cancel();
+  if (action === "yes") emptyDir(root);
+}
+
+let packageName = path.basename(root);
+if (!isValidPackageName(packageName)) {
+  if (interactive) {
+    const answer = await prompts.text({
+      message: "Package name:",
+      defaultValue: toValidPackageName(packageName),
+      placeholder: toValidPackageName(packageName),
+      validate: (value) => (!value || isValidPackageName(value) ? undefined : "Invalid package.json name"),
+    });
+    if (prompts.isCancel(answer)) cancel();
+    packageName = answer || toValidPackageName(packageName);
+  } else {
+    packageName = toValidPackageName(packageName);
+  }
+}
+
+const pm = packageManager();
+
+let immediate = flags.immediate;
+if (immediate === undefined) {
+  if (interactive) {
+    const answer = await prompts.confirm({ message: `Install with ${pm} and start now?` });
+    if (prompts.isCancel(answer)) cancel();
+    immediate = answer;
+  } else {
+    immediate = false;
+  }
+}
+
+prompts.log.step(`Scaffolding project in ${root}...`);
+
+const SKIP = new Set(["node_modules", "dist"]);
+fs.mkdirSync(root, { recursive: true });
+fs.cpSync(templateDir, root, { recursive: true, filter: (source) => !SKIP.has(path.basename(source)) });
+fs.renameSync(path.join(root, "gitignore"), path.join(root, ".gitignore"));
+
+const manifestPath = path.join(root, "package.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-manifest.name = name;
+manifest.name = packageName;
 manifest.dependencies["@zenbu-labs/pixel"] = `^${version}`;
 manifest.pnpm = { onlyBuiltDependencies: ["@zenbu-labs/pixel"] };
 manifest.trustedDependencies = ["@zenbu-labs/pixel"];
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
-for (const file of [path.join("src", "main.tsx")]) {
-  const filePath = path.join(target, file);
-  fs.writeFileSync(filePath, fs.readFileSync(filePath, "utf8").replaceAll("pixel-app", name));
+const start = pm === "npm" ? ["run", "start"] : ["start"];
+
+if (immediate) {
+  prompts.log.step(`Installing dependencies with ${pm}...`);
+  run(pm, ["install"], root);
+  prompts.log.step("Starting the app...");
+  run(pm, start, root);
+  process.exit(0);
 }
 
-const pm = packageManager();
-process.stdout.write(`created ${name} in ${target}\n`);
-
-if (install) {
-  const result = spawnSync(pm, ["install"], { cwd: target, stdio: "inherit" });
-    if (result.status !== 0) fail(`${pm} install failed, run it yourself in ${target}`);
-}
-
-const relative = path.relative(process.cwd(), target) || ".";
-const cdTarget = /\s/.test(relative) ? `"${relative}"` : relative;
-const start = pm === "npm" ? "npm start" : `${pm} run start`;
-process.stdout.write(`\nnext:\n  cd ${cdTarget}\n${install ? "" : `  ${pm} install\n`}  ${start}\n`);
+const relative = path.relative(process.cwd(), root);
+const steps = [];
+if (root !== process.cwd()) steps.push(`cd ${relative.includes(" ") ? `"${relative}"` : relative}`);
+steps.push(`${pm} install`, `${pm} ${start.join(" ")}`);
+prompts.outro(`Done. Now run:\n\n${steps.map((step) => `  ${step}`).join("\n")}`);
