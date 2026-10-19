@@ -33,7 +33,7 @@ Pixel allows for GUIs in the terminal by using a terminal feature to display raw
 - what pixels to display
 - what region to display the pixels
 
-Under the hood, the Pixel library is converting your UI definitions into these graphics instructions.
+Under the hood, the Pixel library is converting your UI definitions into kitty graphics instructions.
 
 ## Rendering types
 Pixel has 2 ways to render UI:
@@ -42,7 +42,7 @@ Pixel has 2 ways to render UI:
 
 These 2 options will give you significantly different results. The webview component lets you render full fidelity webapps, using the chromium browser engine under the hood. This means chromium speed and styling capabilities. 
 
-The native react api lets you define your UI in react, but this gets interpreted by the pixel engine under the hood, which has less styling capabilities than css, and for heavy UI would be less efficient.
+The native react api lets you define your UI in react, but this gets interpreted by the pixel engine under the hood, which has less styling capabilities than css, and for heavy UI would be less efficient than chromium.
 
 One downside to using the webview component is that it requires your app to spawn a new ["renderer" process](https://www.chromium.org/developers/design-documents/multi-process-architecture/#architectural-overview), which can easily consume hundreds of mb if you're not careful. While the pixel engine can use <10mb for a simple app.
 
