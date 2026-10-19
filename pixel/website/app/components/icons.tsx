@@ -13,12 +13,3 @@ export function StarIcon() {
     </svg>
   );
 }
-
-export function CopyIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" aria-hidden>
-      <rect x="5.5" y="5.5" width="8" height="8" />
-      <path d="M10.5 2.5h-8v8" />
-    </svg>
-  );
-}

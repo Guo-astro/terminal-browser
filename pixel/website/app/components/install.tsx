@@ -2,7 +2,7 @@
 
 import { track } from "@vercel/analytics";
 import { useState } from "react";
-import { CopyIcon } from "./icons";
+import PixelCopyIcon from "./pixel-copy-icon";
 
 const MANAGERS = [
   { name: "npm", command: "npm create @zenbu-labs/pixel@latest" },
@@ -36,8 +36,8 @@ export default function Install() {
       </div>
       <div className="box">
         <code>{command}</code>
-        <button className={copied ? "copy done" : "copy"} onClick={copy} aria-label="copy">
-          <CopyIcon />
+        <button className="copy" onClick={copy} aria-label={copied ? "copied" : "copy"}>
+          <PixelCopyIcon done={copied} />
         </button>
       </div>
     </div>
