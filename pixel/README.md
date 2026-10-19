@@ -73,6 +73,17 @@ In supported terminals, pixel will only send changed pixels over the SSH connect
 
 Pixel also comes with support for proxying webview network requests over an SSH connection. This is useful if you want to run a backend on a remote server for an application, but still want the UI to run locally. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
 
+## Terminal scripting
+Pixel provides a standardized way to script the host terminal the pixel app is running in.
+
+This is extremely useful if you expect you would want an agent to open the pixel app for you next to itself. For example, imagine the following scenario for the pixel app [terminal-browser](https://github.com/zenbu-labs/terminal-browser):
+
+> [user] Can you open my website inside terminal-browser?
+> [agent] Sure!
+> [agent] Bash(terminal-browser open localhost:3000 --split right)
+
+In this scenario, `--split right` is powered by pixels terminal scripting API, which under the hood implements scripting commands for many terminals and multiplexers.
+
 ## Questions
 If you are curious how something works or behaves, I highly recommend asking your coding agent to clone this github repo and explore this package, then ask whatever questions you want!
 
