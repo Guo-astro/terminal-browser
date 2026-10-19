@@ -13,7 +13,7 @@ npm create @zenbu-labs/pixel@latest
 ## Notable features:
 
 - A react API to use a rust based graphics engine that runs in the terminal
-- WebView component that lets you render web content (based on top of a fork of electron)
+- WebView component that lets you render web content
 - Support for proxying network requests made by the webview over an SSH connection
 - Can be embedded inside other terminal applications
 - Built in devtools (element inspector, profiler, log viewer)
