@@ -33,7 +33,7 @@ Pixel allows for GUIs in the terminal by using a terminal feature to display raw
 - what pixels to display
 - what region to display the pixels
 
-Under the hood, the Pixel library is converting your UI definitions into kitty graphics instructions.
+Under the hood, the Pixel library is converting UI definitions into kitty graphics instructions.
 
 ## Rendering types
 Pixel has 2 ways to render UI:
