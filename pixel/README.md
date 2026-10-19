@@ -8,7 +8,7 @@ A library for building graphical applications in the terminal
 npm create @zenbu-labs/pixel@latest
 ```
 
-<img alt="pixel demos: terminal-browser, terminal-code and Zed running in a terminal" src="website/public/media/demos.gif" />
+<img alt="pixel demos: terminal-browser, terminal-code and Zed running in a terminal" src="website/public/media/demos.gif" height="400" />
 
 ## Notable features:
 
