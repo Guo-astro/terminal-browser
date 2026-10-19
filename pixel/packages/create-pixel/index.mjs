@@ -162,7 +162,6 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 manifest.name = packageName;
 manifest.dependencies["@zenbu-labs/pixel"] = `^${version}`;
 manifest.pnpm = { onlyBuiltDependencies: ["@zenbu-labs/pixel"] };
-manifest.trustedDependencies = ["@zenbu-labs/pixel"];
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
 const start = pm === "npm" ? ["run", "start"] : ["start"];

@@ -114,6 +114,31 @@ export default async function Home() {
 
         <section>
           {/* fixme: placeholder copy */}
+          <h2>Supported platforms</h2>
+          <ul className="facts platforms">
+            <li>
+              <span>macOS</span>
+              <span className="detail">Apple Silicon · Intel</span>
+            </li>
+            <li>
+              <span>Linux</span>
+              <span className="detail">arm64 · x64</span>
+            </li>
+            <li>
+              <span>Windows</span>
+              <span className="wip" tabIndex={0}>
+                WIP
+                {/* fixme: placeholder copy */}
+                <span className="tooltip" role="tooltip">
+                  You can use pixel on Windows today through WSL. Native Windows support is a work in progress.
+                </span>
+              </span>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          {/* fixme: placeholder copy */}
           <h2>Used by</h2>
           <div className="rows">
             {USED_BY.map((project) => (

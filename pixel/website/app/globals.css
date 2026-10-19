@@ -139,6 +139,29 @@ section h2 { margin: 0 0 18px; font-size: 15px; line-height: 24px; font-weight: 
 .facts li { position: relative; padding: 9px 0 9px 20px; border-top: 1px solid var(--border-soft); }
 .facts li:last-child { border-bottom: 1px solid var(--border-soft); }
 .facts li::before { content: ""; position: absolute; left: 0; top: 19px; width: 6px; height: 6px; background: var(--faint); }
+.platforms li { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.platforms .detail { color: var(--muted); }
+.wip { position: relative; color: var(--muted); border-bottom: 1px dotted var(--faint); cursor: help; outline: none; }
+.wip:hover,
+.wip:focus-visible { color: var(--text); }
+.wip .tooltip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 2;
+  width: 300px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 12px;
+  line-height: 19px;
+  color: var(--text2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+}
+.wip:hover .tooltip,
+.wip:focus .tooltip { opacity: 1; }
 
 .rows a { display: flex; align-items: baseline; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border-soft); font-size: 13px; }
 .rows a:last-child { border-bottom: 1px solid var(--border-soft); }
