@@ -8,7 +8,6 @@ A library for building graphical applications that can run in the terminal
 npm create @zenbu-labs/pixel@latest
 ```
 
-<!-- fixme: placeholder copy -->
 <img alt="pixel demos: terminal-browser, terminal-code and Zed running in a terminal" src="website/public/media/demos.gif" />
 
 ## Notable features:
@@ -26,7 +25,7 @@ npm create @zenbu-labs/pixel@latest
 - [terminal-code](https://github.com/zenbu-labs/terminal-code) - vscode inside the terminal
 # Docs
 
-The documentation below is meant for humans that want to get a better conceptual understanding of the library. For detailed api documentation for your agents please reference [AGENT-DOCS](./AGENT-DOCS.md) and the examples [examples](./examples). 
+The documentation below is meant for humans that want to get a better conceptual understanding of the library. For detailed api documentation for your agents please reference [AGENT-DOCS](./AGENT-DOCS.md) and the [examples](./examples). 
 
 ## How does it work
 
