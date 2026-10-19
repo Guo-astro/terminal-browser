@@ -63,9 +63,13 @@ This is because multiplexers rewrite the output of terminal programs in a way th
 
 
 ## SSH
-Pixel will work out of the box over SSH. In supported terminals, pixel will only send changed pixels over the SSH connection to minimmize bandwidth usage and improve performance. The reason this works is that pixel sends the image data through stdout, just like any other terminal program output. The image data is then sent over the SSH connection, and then interpreted by the terminal.
+Pixel will work out of the box over SSH.
 
-Pixel also comes with support for proxyiing webview network requests over an SSH connection. In this mode the UI would be running locally on your device. This is useful if you want to run a backend on a remote server for an application, but still want the UI to be very snappy and responsive. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
+Displaying graphics over SSH is possible because pixel sends the image data through stdout, just like any other terminal program output. Though, this is a de-optimization compared to running a pixel app locally. When the terminal and pixel app are on the same machine, pixel transfers image data to the terminal through shared memory.
+
+In supported terminals, pixel will only send changed pixels over the SSH connection to minimmize bandwidth usage and improve performance. 
+
+Pixel also comes with support for proxyiing webview network requests over an SSH connection. This is useful if you want to run a backend on a remote server for an application, but still want the UI to run locally. The best example of this is the pixel app [terminal-code](https://github.com/zenbu-labs/terminal-code), which allows users to install the vscode server on a remote machine, and then run the vscode UI locally through the terminal. Another example is [terminal-browser](https://github.com/zenbu-labs/terminal-browser), which lets you access localhost URLs on a remote machine through this SSH proxying feature.
 
 ## Questions
 If you are curious how something works or behaves, I highly recommend asking your coding agent to clone this github repo and explore this package, then ask whatever questions you want!
