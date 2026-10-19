@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type Demo = {
   label: string;
-  media: { kind: "video"; src: string; size: [number, number] } | { kind: "image"; src: string; alt: string; size: [number, number] };
+  media: { kind: "video"; src: string; poster: string; size: [number, number] } | { kind: "image"; src: string; alt: string; size: [number, number] };
   caption: ReactNode;
 };
 
@@ -76,6 +76,7 @@ export default function Carousel({ demos }: { demos: Demo[] }) {
                     videos.current[i] = el;
                   }}
                   src={demo.media.src}
+                  poster={demo.media.poster}
                   muted
                   onEnded={() => i === current && show(current + 1)}
                   onClick={() => {

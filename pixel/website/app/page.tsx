@@ -1,5 +1,5 @@
 import Carousel, { type Demo } from "./components/carousel";
-import { GithubMark, StarIcon } from "./components/icons";
+import { DiscordMark, GithubMark, NpmMark, StarIcon } from "./components/icons";
 import Install from "./components/install";
 import LinkTracker from "./components/link-tracker";
 import PixelBackground from "./components/pixel-background";
@@ -32,7 +32,7 @@ const FEATURES = [
 const DEMOS: Demo[] = [
   {
     label: "Browser",
-    media: { kind: "video", src: "/media/browser.mp4", size: [1954, 1214] },
+    media: { kind: "video", src: "/media/browser.mp4", poster: "/media/browser-poster.jpg", size: [1954, 1214] },
     // fixme: placeholder copy
     caption: (
       <>
@@ -42,7 +42,7 @@ const DEMOS: Demo[] = [
   },
   {
     label: "Vscode",
-    media: { kind: "video", src: "/media/vscode.mp4", size: [1972, 1240] },
+    media: { kind: "video", src: "/media/vscode.mp4", poster: "/media/vscode-poster.jpg", size: [1972, 1240] },
     // fixme: placeholder copy
     caption: (
       <>
@@ -52,7 +52,7 @@ const DEMOS: Demo[] = [
   },
   {
     label: "Zed",
-    media: { kind: "video", src: "/media/zed.mp4", size: [1954, 1214] },
+    media: { kind: "video", src: "/media/zed.mp4", poster: "/media/zed-poster.jpg", size: [1954, 1214] },
     // fixme: placeholder copy
     caption: (
       <>
@@ -63,21 +63,21 @@ const DEMOS: Demo[] = [
 ];
 
 const TERMINALS = [
-  "Ghostty",
-  "iTerm2",
-  "xterm.js",
-  "Konsole",
-  "WezTerm",
-  "Warp",
-  "noctty (Ghostty for Windows)",
-  "Mobile SSH",
-  "st (with a patch)",
-  "wayst",
-  "AbsoluteTelnet/SSH",
-  "cmux",
-  "tty7",
-  "VS Code",
-  "Cursor",
+  { name: "Ghostty", icon: "/terminals/ghostty.png" },
+  { name: "iTerm2", icon: "/terminals/iterm2.png" },
+  { name: "xterm.js", icon: "/terminals/xtermjs.png" },
+  { name: "Konsole", icon: "/terminals/konsole.svg" },
+  { name: "WezTerm", icon: "/terminals/wezterm.svg" },
+  { name: "Warp", icon: "/terminals/warp.svg" },
+  { name: "noctty (Ghostty for Windows)", icon: "/terminals/noctty.svg" },
+  { name: "Mobile SSH", icon: "/terminals/mobile-ssh.svg" },
+  { name: "st (with a patch)", icon: "/terminals/st.svg" },
+  { name: "wayst", icon: "/terminals/wayst.svg" },
+  { name: "AbsoluteTelnet/SSH", icon: "/terminals/absolutetelnet.png" },
+  { name: "cmux", icon: "/terminals/cmux.png" },
+  { name: "tty7", icon: "/terminals/tty7.svg" },
+  { name: "VS Code", icon: "/terminals/vscode.svg" },
+  { name: "Cursor", icon: "/terminals/cursor.svg" },
 ];
 
 const USED_BY = [
@@ -179,19 +179,26 @@ export default async function Home() {
           <h2>Supported terminals</h2>
           <ul className="terminals">
             {TERMINALS.map((terminal) => (
-              <li key={terminal}>{terminal}</li>
+              <li key={terminal.name}>
+                <img src={terminal.icon} alt="" />
+                {terminal.name}
+              </li>
             ))}
           </ul>
         </section>
 
         <footer data-area="footer">
-          <span>MIT · zenbu labs</span>
+          <span>© 2026 terminal-browser</span>
           <span className="links">
-            <a href={DOCS}>docs</a>
-            <a href={EXAMPLES}>examples</a>
-            <a href="https://www.npmjs.com/package/@zenbu-labs/pixel">npm</a>
-            <a href="https://discord.gg/t3jzHHfc6z">discord</a>
-            <a href={PIXEL}>github</a>
+            <a href="https://www.npmjs.com/package/@zenbu-labs/pixel" aria-label="npm" title="npm">
+              <NpmMark />
+            </a>
+            <a href="https://discord.gg/t3jzHHfc6z" aria-label="Discord" title="Discord">
+              <DiscordMark />
+            </a>
+            <a href={PIXEL} aria-label="GitHub" title="GitHub">
+              <GithubMark />
+            </a>
           </span>
         </footer>
       </div>
