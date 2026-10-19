@@ -16,26 +16,6 @@
   --b-rgb: 77, 159, 255;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    --bg: #ffffff;
-    --panel: #f6f6f6;
-    --border: #dcdcdc;
-    --border-soft: #e8e8e8;
-    --text: #111111;
-    --text2: #333333;
-    --muted: #707070;
-    --faint: #a0a0a0;
-    --r: #e5293c;
-    --g: #18a85a;
-    --b: #1f6feb;
-    --r-rgb: 229, 41, 60;
-    --g-rgb: 24, 168, 90;
-    --b-rgb: 31, 111, 235;
-  }
-}
-
 * { box-sizing: border-box; }
 
 body {

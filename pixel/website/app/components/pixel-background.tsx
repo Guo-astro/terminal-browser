@@ -175,7 +175,6 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
   }
 
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const scheme = matchMedia("(prefers-color-scheme: light)");
   let last = 0;
   let raf = 0;
   let stopped = false;
@@ -196,7 +195,6 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
   window.addEventListener("resize", resizeTrail);
   if (!still) window.addEventListener("pointermove", spawnTrail, { passive: true });
   document.fonts.ready.then(() => !stopped && resize());
-  scheme.addEventListener("change", readTints);
   raf = requestAnimationFrame(loop);
 
   return () => {
@@ -205,7 +203,6 @@ function startBackground(canvas: HTMLCanvasElement, trailCanvas: HTMLCanvasEleme
     observer.disconnect();
     window.removeEventListener("resize", resizeTrail);
     window.removeEventListener("pointermove", spawnTrail);
-    scheme.removeEventListener("change", readTints);
   };
 }
 
