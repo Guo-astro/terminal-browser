@@ -101,7 +101,6 @@ function App() {
         width: "100%",
         height: "100%",
         padding: rem * 2,
-        background: theme.bg,
       }}
     >
       <Wordmark cell={Math.round(rem * 0.7)} color={theme.fg} />

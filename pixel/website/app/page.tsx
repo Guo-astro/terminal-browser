@@ -15,17 +15,11 @@ const DOCS = `${PIXEL}#docs`;
 const EXAMPLES = `${PIXEL}/examples`;
 
 const FEATURES = [
-  // fixme: placeholder copy
   "120 fps pixel perfect graphics in the terminal",
-  // fixme: placeholder copy
   "Embeddable inside existing TUIs",
-  // fixme: placeholder copy
   "Built in Chromium WebView component",
-  // fixme: placeholder copy
   "Cross platform",
-  // fixme: placeholder copy
   "TypeScript React API",
-  // fixme: placeholder copy
   "Agent-friendly dev tools",
 ];
 
