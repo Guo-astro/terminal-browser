@@ -11,7 +11,7 @@ export const revalidate = 3600;
 
 const REPO = "https://github.com/zenbu-labs/terminal-browser";
 const PIXEL = `${REPO}/tree/main/pixel`;
-const DOCS = `${PIXEL}#documentation`;
+const DOCS = `${PIXEL}#docs`;
 const EXAMPLES = `${PIXEL}/examples`;
 
 const FEATURES = [
