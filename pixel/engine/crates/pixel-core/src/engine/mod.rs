@@ -64,7 +64,7 @@ static DEFAULT_PROFILE: Smooth = Smooth {
 };
 
 pub struct EngineConfig {
-    pub fonts: Vec<fontdue::Font>,
+    pub fonts: crate::fonts::FontRegistry,
     pub cell_metrics_font: usize,
     pub watch_resize: bool,
     pub tty: Option<String>,
@@ -285,7 +285,7 @@ pub struct Engine {
     pub term: Terminal,
     session_env: crate::terminal::SessionEnv,
     pub comp: Compositor,
-    pub fonts: Vec<fontdue::Font>,
+    pub fonts: crate::fonts::FontRegistry,
     cell_metrics_font: usize,
     pub cell: (u32, u32),
     cell_estimate: Option<(u32, u32)>,
@@ -471,9 +471,13 @@ impl Engine {
         Ok(engine)
     }
 
-    pub fn add_font(&mut self, font: fontdue::Font) -> usize {
-        self.fonts.push(font);
-        self.fonts.len() - 1
+    pub fn add_font_face(&mut self, family: &str, weight: u16, italic: bool, face: fontdue::Font, source: &str) {
+        if !self.fonts.add_face(family, weight, italic, face, source) {
+            return;
+        }
+        for view in &mut self.comp.views {
+            view.tree.mark_layout();
+        }
     }
 
     pub fn add_view(&mut self) -> usize {
@@ -600,7 +604,7 @@ impl Engine {
 
     pub fn flush_view_layout(&mut self, view: usize) {
         let base_px = self.base_px;
-        let fonts = &self.fonts;
+        let fonts = &mut self.fonts;
         if let Some(v) = self.comp.views.get_mut(view) {
             v.tree.flush_layout(fonts, base_px);
         }
@@ -1065,7 +1069,7 @@ impl Engine {
 }
 
 
-pub fn px_for_cell_height(font: &fontdue::Font, cell_height: f32) -> f32 {
+pub fn px_for_cell_height(font: &crate::fonts::Font, cell_height: f32) -> f32 {
     let probe = font
         .horizontal_line_metrics(100.0)
         .expect("font has horizontal metrics");

@@ -74,7 +74,7 @@ fn timed<T>(bucket: Option<&mut f64>, work: impl FnOnce() -> T) -> T {
 pub fn paint(
     tree: &Tree,
     canvas: &mut Canvas,
-    fonts: &[fontdue::Font],
+    fonts: &[crate::fonts::Font],
     cursor: Option<(f32, f32)>,
     clear: Option<(crate::surfaces::Rect, crate::style::Color)>,
 ) {
@@ -121,7 +121,7 @@ fn paint_node(
     tree: &Tree,
     id: NodeId,
     canvas: &mut Canvas,
-    fonts: &[fontdue::Font],
+    fonts: &[crate::fonts::Font],
     cursor: Option<(f32, f32)>,
     blocks: &[(NodeId, Vec<PxRect>, Color)],
     enclosing_block: Option<(&[PxRect], Color)>,
@@ -424,27 +424,33 @@ fn paint_node(
                                 crate::wrap::ellipsize(&text[line.clone()], font, px, room)
                             })
                             .flatten();
-                        match cut {
-                            Some(shown) => canvas.draw_marked(
-                                font,
-                                &shown,
-                                0..shown.len(),
-                                origin.0 as i32,
-                                baseline,
-                                px,
-                                color,
-                                &[],
-                            ),
-                            None => canvas.draw_marked(
-                                font,
-                                text,
-                                line.clone(),
-                                origin.0 as i32,
-                                baseline,
-                                px,
-                                color,
-                                marks,
-                            ),
+                        let passes: &[i32] = if font.synthetic_bold { &[0, (px / 24.0).max(1.0) as i32] } else { &[0] };
+                        let shear = if font.synthetic_italic { ITALIC_SHEAR } else { 0.0 };
+                        for &dx in passes {
+                            match &cut {
+                                Some(shown) => canvas.draw_marked_sheared(
+                                    font,
+                                    shown,
+                                    0..shown.len(),
+                                    origin.0 as i32 + dx,
+                                    baseline,
+                                    px,
+                                    color,
+                                    &[],
+                                    shear,
+                                ),
+                                None => canvas.draw_marked_sheared(
+                                    font,
+                                    text,
+                                    line.clone(),
+                                    origin.0 as i32 + dx,
+                                    baseline,
+                                    px,
+                                    color,
+                                    marks,
+                                    shear,
+                                ),
+                            }
                         }
                         continue;
                     }
@@ -453,21 +459,11 @@ fn paint_node(
                         let Some(segment) = text.get(range) else {
                             continue;
                         };
-                        let shear = if span.italic { ITALIC_SHEAR } else { 0.0 };
-                        canvas.draw_text_sheared(
-                            font, segment, x as i32, baseline, px, span.color, shear,
-                        );
-                        if span.bold {
-                            let offset = (px / 24.0).max(1.0) as i32;
-                            canvas.draw_text_sheared(
-                                font,
-                                segment,
-                                x as i32 + offset,
-                                baseline,
-                                px,
-                                span.color,
-                                shear,
-                            );
+                        let face = &fonts[font.variant(span.bold, span.italic).min(fonts.len() - 1)];
+                        let shear = if face.synthetic_italic { ITALIC_SHEAR } else { 0.0 };
+                        let passes: &[i32] = if face.synthetic_bold { &[0, (px / 24.0).max(1.0) as i32] } else { &[0] };
+                        for &dx in passes {
+                            canvas.draw_fitted(face, font, segment, x as i32 + dx, baseline, px, span.color, shear);
                         }
                         let width = measure_text(font, segment, px);
                         let thickness = (px / 14.0).max(1.0);
@@ -765,7 +761,7 @@ fn paint_selection(
     lines: &[Range<usize>],
     selection: &Range<usize>,
     origin: (f32, f32),
-    font: &fontdue::Font,
+    font: &crate::fonts::Font,
     px: f32,
     line_h: f32,
     visible: PxRect,
@@ -858,7 +854,7 @@ mod tests {
 
     #[test]
     fn image_nodes_measure_to_aspect_size_and_paint_pixels() {
-        let font = fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default()).unwrap();
+        let font = crate::fonts::Font::single(fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default()).unwrap());
         let src = "mem://paint-solid";
         crate::image_cache::insert_decoded(
             src.into(),
@@ -884,7 +880,7 @@ mod tests {
             }],
             ..Desc::default()
         });
-        tree.flush_layout(std::slice::from_ref(&font), 16.0);
+        tree.flush_layout(&mut crate::fonts::FontRegistry::bundled(), 16.0);
         let node = tree.children(tree.root())[0];
         let rect = tree.rect(node).unwrap();
         assert_eq!((rect.w, rect.h), (40.0, 20.0), "height follows the pixel aspect");
@@ -898,7 +894,7 @@ mod tests {
 
     #[test]
     fn a_translucent_scaled_surface_does_not_keep_its_previous_frame() {
-        let font = fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default()).unwrap();
+        let font = crate::fonts::Font::single(fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default()).unwrap());
         let surface = 907_001;
         let (sw, sh) = (200u32, 200u32);
         let frame = |block: (u32, u32)| {
@@ -923,7 +919,7 @@ mod tests {
             }],
             ..Desc::default()
         });
-        tree.flush_layout(std::slice::from_ref(&font), 16.0);
+        tree.flush_layout(&mut crate::fonts::FontRegistry::bundled(), 16.0);
         let mut canvas = Canvas::new(100, 100);
         let clear = Some((crate::surfaces::Rect::sized(100, 100), [0u8, 0, 0, 0]));
         let at = |canvas: &Canvas, x: u32, y: u32| canvas.pixels[((y * 100 + x) * 4) as usize..][..4].to_vec();
@@ -941,7 +937,7 @@ mod tests {
 
     #[test]
     fn recording_breaks_paint_into_buckets() {
-        let font = fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default()).unwrap();
+        let font = crate::fonts::Font::single(fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default()).unwrap());
         let mut tree = Tree::new((300.0, 100.0));
         tree.reconcile(Desc {
             children: vec![Desc {
@@ -955,7 +951,7 @@ mod tests {
             }],
             ..Desc::default()
         });
-        tree.flush_layout(std::slice::from_ref(&font), 16.0);
+        tree.flush_layout(&mut crate::fonts::FontRegistry::bundled(), 16.0);
         let mut canvas = Canvas::new(300, 100);
 
         crate::profiler::start();

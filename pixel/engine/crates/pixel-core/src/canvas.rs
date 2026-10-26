@@ -1,4 +1,5 @@
 use crate::surfaces::{OpaqueArea, Rect};
+use crate::system_fonts::{self, Glyph};
 use crate::text_input::{MARK_CHAR, Mark, mark_advance_at};
 
 #[derive(Clone, Copy)]
@@ -12,7 +13,87 @@ pub struct Frame<'a> {
 }
 
 type GlyphKey = (usize, char, u32);
-type GlyphCache = std::collections::HashMap<GlyphKey, (fontdue::Metrics, Vec<u8>)>;
+
+fn glyph_key(font: &crate::fonts::Font, ch: char, px: f32) -> GlyphKey {
+    (font.id(), ch, px.to_bits())
+}
+
+fn monospace_advance(font: &crate::fonts::Font, px: f32) -> Option<f32> {
+    let narrow = font.metrics('i', px).advance_width;
+    (narrow > 0.0 && narrow == font.metrics('M', px).advance_width).then_some(narrow)
+}
+
+fn draws_itself(font: &crate::fonts::Font, ch: char) -> bool {
+    ch.is_control() || font.lookup_glyph_index(ch) != 0 || (ch.is_whitespace() && font.fallback_for(ch).is_none())
+}
+
+fn cells(ch: char) -> usize {
+    unicode_width::UnicodeWidthChar::width(ch).unwrap_or(1)
+}
+
+fn natural_fallback_advance(font: &crate::fonts::Font, ch: char, px: f32) -> f32 {
+    if let Some(face) = font.fallback_for(ch) {
+        return face.metrics(ch, px).advance_width;
+    }
+    // Matches `rasterize_glyph`, which draws nothing for a zero-width character no font has.
+    system_fonts::advance(ch, px).unwrap_or_else(|| if cells(ch) == 0 { 0.0 } else { font.metrics(ch, px).advance_width })
+}
+
+fn glyph_advance(font: &crate::fonts::Font, ch: char, px: f32) -> f32 {
+    if draws_itself(font, ch) {
+        return font.metrics(ch, px).advance_width;
+    }
+    match monospace_advance(font, px) {
+        Some(cell) => cell * cells(ch) as f32,
+        None => natural_fallback_advance(font, ch, px),
+    }
+}
+
+fn rasterize_glyph(font: &crate::fonts::Font, ch: char, px: f32) -> Glyph {
+    if draws_itself(font, ch) {
+        let (metrics, pixels) = font.rasterize(ch, px);
+        return Glyph { metrics, pixels, color: false };
+    }
+    let cell = monospace_advance(font, px);
+    let span = cell.map(|cell| cell * cells(ch) as f32);
+    let mut glyph = borrowed_glyph(font, ch, px);
+    if let (Some(span), Some(drawn)) = (span, &glyph)
+        && span > 0.0
+        && drawn.metrics.width as f32 > span
+    {
+        glyph = borrowed_glyph(font, ch, px * span / drawn.metrics.width as f32);
+    }
+    let mut glyph = glyph.unwrap_or_else(|| {
+        if cells(ch) == 0 {
+            return Glyph { metrics: fontdue::Metrics::default(), pixels: Vec::new(), color: false };
+        }
+        let (metrics, pixels) = font.rasterize(ch, px);
+        Glyph { metrics, pixels, color: false }
+    });
+    if let (Some(cell), Some(span)) = (cell, span) {
+        fit_to_cells(&mut glyph.metrics, cell, span);
+    }
+    glyph
+}
+
+fn borrowed_glyph(font: &crate::fonts::Font, ch: char, px: f32) -> Option<Glyph> {
+    if let Some(face) = font.fallback_for(ch) {
+        let (metrics, pixels) = face.rasterize(ch, px);
+        return Some(Glyph { metrics, pixels, color: false });
+    }
+    system_fonts::rasterize(ch, px)
+}
+
+fn fit_to_cells(metrics: &mut fontdue::Metrics, cell: f32, span: f32) {
+    metrics.xmin = if span == 0.0 {
+        (-(cell + metrics.width as f32) / 2.0).round() as i32
+    } else {
+        metrics.xmin + ((span - metrics.advance_width) / 2.0).round() as i32
+    };
+    metrics.advance_width = span;
+}
+
+type GlyphCache = std::collections::HashMap<GlyphKey, Glyph>;
 std::thread_local! {
     static GLYPH_CACHE: std::cell::RefCell<GlyphCache> = std::cell::RefCell::new(GlyphCache::new());
     static ADVANCE_CACHE: std::cell::RefCell<std::collections::HashMap<GlyphKey, f32>> =
@@ -378,7 +459,7 @@ impl Canvas {
 
     pub fn draw_text(
         &mut self,
-        font: &fontdue::Font,
+        font: &crate::fonts::Font,
         text: &str,
         x: i32,
         baseline: i32,
@@ -391,7 +472,7 @@ impl Canvas {
     #[allow(clippy::too_many_arguments)]
     pub fn draw_text_sheared(
         &mut self,
-        font: &fontdue::Font,
+        font: &crate::fonts::Font,
         text: &str,
         x: i32,
         baseline: i32,
@@ -412,25 +493,34 @@ impl Canvas {
         );
     }
 
+    // Draws `face`'s glyphs on `layout`'s advances, each centered in its cell, so a bold or italic face keeps the
+    // geometry text was laid out, selected and hit-tested with.
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn draw_marked(
+    pub(crate) fn draw_fitted(
         &mut self,
-        font: &fontdue::Font,
+        face: &crate::fonts::Font,
+        layout: &crate::fonts::Font,
         text: &str,
-        range: std::ops::Range<usize>,
         x: i32,
         baseline: i32,
         px: f32,
         color: [u8; 4],
-        marks: &[Mark],
+        shear: f32,
     ) {
-        self.draw_marked_sheared(font, text, range, x, baseline, px, color, marks, 0.0);
+        let mut pen_x = x as f32;
+        for ch in text.chars() {
+            let advance = char_advance(layout, ch, 0, px, &[]);
+            let glyph_x = pen_x + ((advance - char_advance(face, ch, 0, px, &[])) / 2.0).round();
+            let mut buf = [0u8; 4];
+            self.draw_marked_sheared(face, ch.encode_utf8(&mut buf), 0..ch.len_utf8(), glyph_x as i32, baseline, px, color, &[], shear);
+            pen_x += advance;
+        }
     }
 
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn draw_marked_sheared(
         &mut self,
-        font: &fontdue::Font,
+        font: &crate::fonts::Font,
         text: &str,
         range: std::ops::Range<usize>,
         x: i32,
@@ -447,23 +537,28 @@ impl Canvas {
                     pen_x += mark_advance_at(marks, range.start + i);
                     continue;
                 }
-                let (metrics, coverage) = cache
-                    .entry((font.file_hash(), ch, px.to_bits()))
-                    .or_insert_with(|| font.rasterize(ch, px));
+                let glyph = cache
+                    .entry(glyph_key(font, ch, px))
+                    .or_insert_with(|| rasterize_glyph(font, ch, px));
+                let metrics = glyph.metrics;
                 let glyph_x = pen_x.round() as i32 + metrics.xmin;
                 // ymin is the bottom edge's offset from the baseline (positive = up),
                 // so the bitmap's top row sits at baseline - height - ymin.
                 let glyph_y = baseline - metrics.height as i32 - metrics.ymin;
-                self.blend_mask(
-                    glyph_x,
-                    glyph_y,
-                    metrics.width,
-                    metrics.height,
-                    coverage,
-                    color,
-                    baseline,
-                    shear,
-                );
+                if glyph.color {
+                    self.blend_color(glyph_x, glyph_y, metrics.width, &glyph.pixels, color[3]);
+                } else {
+                    self.blend_mask(
+                        glyph_x,
+                        glyph_y,
+                        metrics.width,
+                        metrics.height,
+                        &glyph.pixels,
+                        color,
+                        baseline,
+                        shear,
+                    );
+                }
                 pen_x += metrics.advance_width;
             }
         });
@@ -505,6 +600,26 @@ impl Canvas {
                 *out = (right + left).round() as u8;
             }
             self.blend_rows(x + whole as i32, py, w + 1, 1, &sheared, color);
+        }
+    }
+
+    fn blend_color(&mut self, x: i32, y: i32, w: usize, pixels: &[u8], opacity: u8) {
+        let (cx1, cy1, cx2, cy2) = self.clip_bounds();
+        for (row, src_row) in pixels.chunks_exact(w * 4).enumerate() {
+            let py = y + row as i32;
+            if py < cy1 as i32 || py >= cy2 as i32 {
+                continue;
+            }
+            for (col, src) in src_row.chunks_exact(4).enumerate() {
+                let px = x + col as i32;
+                if px < cx1 as i32 || px >= cx2 as i32 || src[3] == 0 {
+                    continue;
+                }
+                let faded: [u8; 4] =
+                    std::array::from_fn(|k| ((u32::from(src[k]) * u32::from(opacity) + 127) / 255) as u8);
+                let i = ((py as u32 * self.width + px as u32) * 4) as usize;
+                blend_pixel(&mut self.pixels[i..i + 4], &faded, faded[3]);
+            }
         }
     }
 
@@ -1285,12 +1400,12 @@ pub(crate) fn rounded_rect_path(
     pb.finish()
 }
 
-pub fn measure_text(font: &fontdue::Font, text: &str, px: f32) -> f32 {
+pub fn measure_text(font: &crate::fonts::Font, text: &str, px: f32) -> f32 {
     measure_marked(font, text, 0..text.len(), px, &[])
 }
 
 pub(crate) fn measure_marked(
-    font: &fontdue::Font,
+    font: &crate::fonts::Font,
     text: &str,
     range: std::ops::Range<usize>,
     px: f32,
@@ -1304,15 +1419,15 @@ pub(crate) fn measure_marked(
                     return mark_advance_at(marks, range.start + i);
                 }
                 *cache
-                    .entry((font.file_hash(), ch, px.to_bits()))
-                    .or_insert_with(|| font.metrics(ch, px).advance_width)
+                    .entry(glyph_key(font, ch, px))
+                    .or_insert_with(|| glyph_advance(font, ch, px))
             })
             .sum()
     })
 }
 
 pub(crate) fn char_advance(
-    font: &fontdue::Font,
+    font: &crate::fonts::Font,
     ch: char,
     offset: usize,
     px: f32,
@@ -1323,8 +1438,8 @@ pub(crate) fn char_advance(
     }
     ADVANCE_CACHE.with_borrow_mut(|cache| {
         *cache
-            .entry((font.file_hash(), ch, px.to_bits()))
-            .or_insert_with(|| font.metrics(ch, px).advance_width)
+            .entry(glyph_key(font, ch, px))
+            .or_insert_with(|| glyph_advance(font, ch, px))
     })
 }
 
@@ -1580,5 +1695,26 @@ mod tests {
         assert!(red(30, 40) < red(60, 40), "{} !< {}", red(30, 40), red(60, 40));
         assert_eq!(red(80, 40), 255, "painted outside the rect");
         assert_eq!(red(11, 11), 255, "painted outside the rounded corner");
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn borrowed_glyphs_follow_the_cell_grid() {
+        let font = crate::fonts::Font::single(fontdue::Font::from_bytes(include_bytes!("../../../assets/fonts/JetBrainsMono-Regular.ttf").as_slice(), fontdue::FontSettings::default()).unwrap());
+        let cell = measure_text(&font, "a", 20.0);
+        assert_eq!(measure_text(&font, "ᗜ", 20.0), cell);
+        assert_eq!(measure_text(&font, "漢", 20.0), cell * 2.0);
+        assert_eq!(measure_text(&font, "🙂", 20.0), cell * 2.0);
+        assert_eq!(measure_text(&font, "o\u{361}", 20.0), cell);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn emoji_draw_in_colour_regardless_of_text_colour() {
+        let font = crate::fonts::Font::single(fontdue::Font::from_bytes(include_bytes!("../../../assets/fonts/JetBrainsMono-Regular.ttf").as_slice(), fontdue::FontSettings::default()).unwrap());
+        let mut canvas = Canvas::new(40, 40);
+        canvas.draw_text(&font, "🙂", 4, 30, 24.0, [255, 255, 255, 255]);
+        let yellowish = canvas.pixels.chunks_exact(4).any(|p| p[0] > 150 && p[1] > 100 && p[2] < 80);
+        assert!(yellowish, "emoji drew without its own colours");
     }
 }
