@@ -46,7 +46,7 @@
     "scripts/apparmor.sh"
   ],
   "config": {
-    "electron": "44.2.0"
+    "electron": "44.5.1"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.mjs",
